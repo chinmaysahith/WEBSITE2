@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-import { Khand, Hind } from "next/font/google";
+import { Khand, Hind, Fraunces } from "next/font/google";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import CookieBanner from "@/components/shared/CookieBanner";
@@ -10,6 +10,14 @@ import "./globals.css";
 const bilbesto = localFont({
   src: "../../public/fonts/VintageBilbesto.otf",
   variable: "--font-numeral",
+  display: "swap",
+});
+
+const fraunces = Fraunces({
+  weight: ["300", "400", "500", "700", "900"],
+  style: ["normal", "italic"],
+  subsets: ["latin"],
+  variable: "--font-editorial",
   display: "swap",
 });
 
@@ -75,7 +83,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${bilbesto.variable} ${khand.variable} ${hind.variable} h-full`}
+      className={`${bilbesto.variable} ${fraunces.variable} ${khand.variable} ${hind.variable} h-full`}
     >
       <body className="min-h-full flex flex-col antialiased overflow-x-hidden">
         <Navbar links={navLinks} siteName="APSLOCK" />

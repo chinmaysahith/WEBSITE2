@@ -7,7 +7,7 @@ interface WorkProcessProps {
 
 export default function WorkProcess({ process }: WorkProcessProps) {
   return (
-    <section className="py-24 md:py-32">
+    <section className="py-24 md:py-32 gradient-section-cool relative gradient-noise overflow-hidden">
       <div className="container-wide">
         <FadeIn>
           <p className="text-eyebrow mb-4">How We Work</p>

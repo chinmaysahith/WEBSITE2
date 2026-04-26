@@ -16,7 +16,7 @@ export default function AboutPage() {
   return (
     <>
       {/* Hero */}
-      <section className="pt-36 pb-20 md:pt-44 md:pb-28">
+      <section className="pt-36 pb-20 md:pt-44 md:pb-28 gradient-hero relative gradient-noise overflow-hidden">
         <div className="container-wide">
           <FadeIn>
             <p className="text-eyebrow text-accent mb-4">About Us</p>

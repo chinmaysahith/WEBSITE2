@@ -18,7 +18,7 @@ export default function CaseStudiesPage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative pt-36 pb-20 md:pt-44 md:pb-28 overflow-hidden">
+      <section className="relative pt-36 pb-20 md:pt-44 md:pb-28 overflow-hidden gradient-hero gradient-noise">
         <SpinningText />
         <div className="container-wide">
           <FadeIn>
@@ -42,12 +42,12 @@ export default function CaseStudiesPage() {
       </section>
 
       {/* Process */}
-      <div className="bg-surface">
+      <div className="gradient-section-warm relative gradient-noise overflow-hidden">
         <ProcessSteps steps={processSteps} />
       </div>
 
       {/* CTA */}
-      <section className="py-24 md:py-32">
+      <section className="py-24 md:py-32 gradient-cta relative gradient-noise overflow-hidden">
         <div className="container-wide text-center">
           <FadeIn>
             <h2 className="text-section-heading text-text mb-6">

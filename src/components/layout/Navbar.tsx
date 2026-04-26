@@ -21,93 +21,124 @@ export default function Navbar({ links, siteName }: NavbarProps) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Prevent body scroll when mobile menu is open
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [isOpen]);
 
   return (
-    <header
-      className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-        scrolled
-          ? "bg-surface/95 backdrop-blur-md border-b border-border shadow-sm"
-          : "bg-transparent"
-      )}
-    >
-      <nav
-        className="container-wide flex items-center justify-between h-18 md:h-20"
-        aria-label="Main navigation"
+    <>
+      <header
+        className={cn(
+          "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+          scrolled
+            ? "bg-surface/95 backdrop-blur-md border-b border-border shadow-sm"
+            : "bg-transparent"
+        )}
       >
-        {/* Logo */}
-        <Link
-          href="/"
-          className="text-text font-wordmark font-bold text-xl tracking-tight hover:text-accent transition-colors duration-200"
-          onClick={() => setIsOpen(false)}
+        <nav
+          className="container-wide flex items-center justify-between h-18 md:h-20"
+          aria-label="Main navigation"
         >
-          {siteName}
-        </Link>
+          <Link
+            href="/"
+            className="text-text font-wordmark font-bold text-xl tracking-tight hover:text-accent transition-colors duration-200"
+            onClick={() => setIsOpen(false)}
+          >
+            {siteName}
+          </Link>
 
-        {/* Desktop Nav */}
-        <ul className="hidden md:flex items-center gap-8">
-          {links
-            .filter((l) => l.href !== "/")
-            .map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className="text-sm text-text-muted hover:text-text transition-colors duration-200 relative after:absolute after:bottom-[-2px] after:left-0 after:w-0 after:h-[1px] after:bg-accent after:transition-all after:duration-300 hover:after:w-full"
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          <li>
-            <Link
-              href="/contact"
-              className="inline-flex items-center px-5 py-2.5 text-sm font-medium bg-accent text-white rounded-full hover:bg-accent-hover transition-colors duration-200"
-            >
-              Get in touch
-            </Link>
-          </li>
-        </ul>
+          {/* Desktop Nav */}
+          <ul className="hidden md:flex items-center gap-8">
+            {links
+              .filter((l) => l.href !== "/")
+              .map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-text-muted hover:text-text transition-colors duration-200 relative after:absolute after:bottom-[-2px] after:left-0 after:w-0 after:h-[1px] after:bg-accent after:transition-all after:duration-300 hover:after:w-full"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            <li>
+              <Link
+                href="/contact"
+                className="inline-flex items-center px-5 py-2.5 text-sm font-medium bg-accent text-white rounded-full hover:bg-accent-hover transition-colors duration-200"
+              >
+                Get in touch
+              </Link>
+            </li>
+          </ul>
+        </nav>
+      </header>
 
-        {/* Mobile Toggle */}
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden p-2 text-text hover:text-accent transition-colors duration-200"
-          aria-label={isOpen ? "Close menu" : "Open menu"}
-          aria-expanded={isOpen}
+      {/* ── Mobile Floating Menu Button (bottom-right FAB) ── */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="md:hidden fixed bottom-6 right-6 z-[60] w-14 h-14 rounded-full flex items-center justify-center transition-transform duration-300 active:scale-90"
+        aria-label={isOpen ? "Close menu" : "Open menu"}
+        aria-expanded={isOpen}
+        style={{
+          backgroundColor: "var(--text)",
+          color: "var(--bg)",
+          boxShadow: "0 8px 30px rgba(0,0,0,0.3)",
+        }}
+      >
+        <div
+          className="transition-transform duration-300"
+          style={{ transform: isOpen ? "rotate(90deg)" : "rotate(0deg)" }}
         >
-          {isOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-      </nav>
+          {isOpen ? <X size={22} strokeWidth={2.5} /> : <Menu size={22} strokeWidth={2.5} />}
+        </div>
+      </button>
 
-      {/* Mobile Menu Overlay */}
+      {/* ── Mobile Full-Screen Menu Overlay ── */}
       <div
         aria-hidden={!isOpen}
         className={cn(
-          "fixed inset-0 top-18 bg-surface z-40 transition-all duration-300 md:hidden flex flex-col",
+          "fixed inset-0 z-[55] md:hidden flex flex-col",
+          "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
           isOpen
             ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
+            : "opacity-0 pointer-events-none translate-y-4"
         )}
+        style={{ backgroundColor: "var(--surface)" }}
       >
-        <ul className="flex flex-col items-start gap-1 p-6 pt-8">
-          {links.map((link) => (
-            <li key={link.href} className="w-full">
+        {/* Top bar with logo */}
+        <div className="flex items-center px-6 h-18">
+          <Link
+            href="/"
+            className="text-text font-wordmark font-bold text-xl tracking-tight"
+            onClick={() => setIsOpen(false)}
+          >
+            {siteName}
+          </Link>
+        </div>
+
+        {/* Nav links */}
+        <ul className="flex flex-col items-start gap-1 px-6 pt-4 flex-1">
+          {links.map((link, i) => (
+            <li key={link.href} className="w-full overflow-hidden">
               <Link
                 href={link.href}
                 onClick={() => setIsOpen(false)}
                 className="block py-3 text-2xl font-display text-text hover:text-accent transition-colors duration-200 border-b border-border-light"
+                style={{
+                  transform: isOpen ? "translateY(0)" : "translateY(100%)",
+                  opacity: isOpen ? 1 : 0,
+                  transition: `transform 0.5s cubic-bezier(0.22, 1, 0.36, 1) ${isOpen ? i * 0.05 + 0.1 : 0}s, opacity 0.4s ease ${isOpen ? i * 0.05 + 0.1 : 0}s`,
+                }}
               >
                 {link.label}
               </Link>
             </li>
           ))}
         </ul>
-        <div className="p-6 mt-auto">
+
+        {/* Bottom CTA — padded to clear the FAB */}
+        <div className="px-6 pb-24">
           <Link
             href="/contact"
             onClick={() => setIsOpen(false)}
@@ -117,6 +148,6 @@ export default function Navbar({ links, siteName }: NavbarProps) {
           </Link>
         </div>
       </div>
-    </header>
+    </>
   );
 }

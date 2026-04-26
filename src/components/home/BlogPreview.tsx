@@ -12,7 +12,7 @@ export default function BlogPreview({ posts }: BlogPreviewProps) {
   const latestPosts = posts.slice(0, 4);
 
   return (
-    <section className="py-24 md:py-32 lg:py-40">
+    <section className="py-24 md:py-32 lg:py-40 gradient-section-cool relative gradient-noise overflow-hidden">
       <div className="container-wide">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16">
           <FadeIn>
@@ -38,7 +38,8 @@ export default function BlogPreview({ posts }: BlogPreviewProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {latestPosts.map((post, index) => (
             <FadeIn key={post.slug} delay={index * 0.08}>
-              <article className="group">
+              <Link href={`/blogs/${post.slug}`} className="group block">
+                <article>
                 <div className="relative aspect-[16/10] overflow-hidden rounded-xl bg-border-light mb-5">
                   <Image
                     src={post.image.src}
@@ -58,12 +59,11 @@ export default function BlogPreview({ posts }: BlogPreviewProps) {
                   </span>
                 </div>
                 <h3 className="text-base font-semibold text-text leading-snug group-hover:text-accent transition-colors duration-200">
-                  <Link href={`/blogs`}>
-                    {post.title}
-                  </Link>
+                  {post.title}
                 </h3>
               </article>
-            </FadeIn>
+            </Link>
+          </FadeIn>
           ))}
         </div>
       </div>

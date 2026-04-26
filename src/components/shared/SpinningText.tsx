@@ -1,15 +1,41 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { useEffect, useRef } from "react";
 
 export default function SpinningText() {
-  const { scrollYProgress } = useScroll();
-  // Rotates a full 360 degrees forward as the user scrolls down the page
-  const rotateValue = useTransform(scrollYProgress, [0, 1], [0, 360]);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Continuous rotation via requestAnimationFrame for a smooth, always-alive feel.
+  // Scroll speed is layered on top: scrolling faster → spins faster.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    let angle = 0;
+    let lastScroll = window.scrollY;
+    let raf: number;
+
+    const BASE_SPEED = 0.015; // degrees per frame at 60fps — slow ambient spin
+
+    const tick = () => {
+      const currentScroll = window.scrollY;
+      const delta = currentScroll - lastScroll;
+      lastScroll = currentScroll;
+
+      // Base rotation + scroll boost (scroll faster → spin faster)
+      angle += BASE_SPEED + delta * 0.04;
+      el.style.transform = `rotate(${angle}deg)`;
+
+      raf = requestAnimationFrame(tick);
+    };
+
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
 
   return (
-    <motion.div
-      style={{ rotate: rotateValue }}
+    <div
+      ref={ref}
       aria-hidden="true"
       className="absolute -top-[25vh] -right-[15vw] w-[90vh] h-[90vh] text-border/40 pointer-events-none select-none z-0 hidden lg:block"
     >
@@ -21,10 +47,10 @@ export default function SpinningText() {
         />
         <text className="font-display text-[1.4rem] font-bold uppercase tracking-[0.25em]" fill="currentColor">
           <textPath href="#circlePath" startOffset="0%">
-            {"LET’S CREATE THINGS • LET’S CREATE THINGS • "}
+            {"LET'S CREATE THINGS • LET'S CREATE THINGS • "}
           </textPath>
         </text>
       </svg>
-    </motion.div>
+    </div>
   );
 }

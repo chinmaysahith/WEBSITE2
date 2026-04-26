@@ -25,7 +25,9 @@ export default function ServiceSegment({ segment, index }: ServiceSegmentProps) 
 
   // Disable parallax on touch/mobile — janky on low-powered devices
   const [enableParallax, setEnableParallax] = useState(false);
+  const [mounted, setMounted] = useState(false);
   useEffect(() => {
+    setMounted(true);
     const mq = window.matchMedia("(min-width: 1024px) and (hover: hover)");
     setEnableParallax(mq.matches);
     const handler = (e: MediaQueryListEvent) => setEnableParallax(e.matches);
@@ -34,7 +36,7 @@ export default function ServiceSegment({ segment, index }: ServiceSegmentProps) 
   }, []);
 
   const { scrollYProgress } = useScroll({
-    target: containerRef,
+    target: mounted ? containerRef : undefined,
     offset: ["start end", "end start"],
   });
 
@@ -42,7 +44,7 @@ export default function ServiceSegment({ segment, index }: ServiceSegmentProps) 
 
   return (
     <section
-      className={`relative overflow-hidden py-20 md:py-28 lg:py-40 ${isEven ? "bg-bg" : "bg-surface"}`}
+      className={`relative overflow-hidden py-20 md:py-28 lg:py-40 ${isEven ? "gradient-section-warm" : "gradient-section-cool"} gradient-noise`}
       ref={containerRef}
     >
       {/* Background numeral — decorative, clipped by overflow-hidden */}

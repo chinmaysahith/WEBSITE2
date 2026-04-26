@@ -21,7 +21,7 @@ interface ValuesSectionProps {
 
 export default function ValuesSection({ values }: ValuesSectionProps) {
   return (
-    <section className="py-24 md:py-32 bg-surface">
+    <section className="py-24 md:py-32 gradient-section-warm relative gradient-noise overflow-hidden">
       <div className="container-wide">
         <FadeIn>
           <p className="text-eyebrow mb-4">Our Values</p>

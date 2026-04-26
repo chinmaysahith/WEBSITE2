@@ -101,10 +101,10 @@ export const featuredCases: FeaturedCase[] = [
     industry: "eCommerce",
     year: "2024",
     image: {
-      src: "/images/case-study-1.jpg",
+      src: "/images/cases/case-01.jpg",
       alt: "Elevate Commerce website redesign showcase",
       width: 800,
-      height: 600,
+      height: 1200,
     },
   },
   {
@@ -117,10 +117,10 @@ export const featuredCases: FeaturedCase[] = [
     industry: "Healthcare",
     year: "2024",
     image: {
-      src: "/images/case-study-3.jpg",
+      src: "/images/cases/case-02.jpg",
       alt: "Haven Health patient portal interface",
       width: 800,
-      height: 600,
+      height: 1200,
     },
   },
   {
@@ -133,10 +133,10 @@ export const featuredCases: FeaturedCase[] = [
     industry: "Retail",
     year: "2023",
     image: {
-      src: "/images/case-study-2.jpg",
+      src: "/images/cases/case-03.jpg",
       alt: "GreenLeaf Organics brand identity system",
       width: 800,
-      height: 600,
+      height: 1200,
     },
   },
 ];
@@ -425,6 +425,131 @@ export interface BlogPost {
 }
 
 export const blogPosts: BlogPost[] = [
+  {
+    slug: "your-interface-isnt-broken",
+    title: "Your Interface Isn't Broken. It's Indistinguishable.",
+    excerpt:
+      "Open five SaaS products in your space. Blur the logos. They start to look the same. Design has become predictable — not because teams lack talent, but because everyone is optimizing against the same references.",
+    content: `## The Convergence Problem
+
+Open five SaaS products in your space.
+Blur the logos.
+
+They start to look the same.
+
+Clean grids. Soft shadows. Rounded buttons. Safe typography.
+Nothing is wrong with any of it.
+
+**That's the problem.**
+
+Design has become predictable. Not because teams lack talent—but because everyone is optimizing against the same references.
+
+"Best practices" didn't just standardize usability.
+They standardized identity.
+
+When every product feels familiar, users don't choose—they default. And default decisions rarely build loyalty.
+
+## The Metrics Blind Spot
+
+Most teams don't notice this drift.
+
+They measure:
+
+- Task completion
+- Click-through rates
+- Usability scores
+
+All green.
+
+Meanwhile:
+
+- Recall drops
+- Differentiation fades
+- Switching costs shrink
+
+Because usability tells you if something works.
+It doesn't tell you if it **matters**.
+
+## The Smoothness Trap
+
+We've quietly equated good design with invisible design.
+
+The smoother the experience, the less the user feels it.
+The less they feel it, the less they remember it.
+
+That's not user-centric.
+That's neutral.
+
+There's a difference between removing friction and removing character.
+
+Broken flows? Fix them.
+Confusing navigation? Fix it.
+
+But beyond that, total smoothness becomes a tradeoff.
+
+If every interaction is predictable, nothing stands out.
+If nothing stands out, nothing sticks.
+
+## Where Products Converge
+
+Look at where most products converge:
+
+- Same onboarding patterns
+- Same dashboard layouts
+- Same micro-interactions
+- Same tone of voice
+
+It's not coincidence.
+It's convergence.
+
+Design systems made teams faster.
+They also made outcomes similar.
+
+## The Shift
+
+The shift isn't about rejecting usability.
+
+It's about deciding where **not** to be generic.
+
+Not everywhere. Just where it counts.
+
+A moment in onboarding that signals personality.
+Copy that sounds like a human, not a system.
+A visual decision that feels intentional, not safe.
+
+Small signals. Big effect.
+
+Because users don't remember flows.
+They remember **moments**.
+
+## The Harder Question
+
+Ask a harder question:
+
+**If your UI was stripped of branding, would anyone know it's yours?**
+
+If the answer is no, your design isn't user-centric.
+It's reference-centric.
+
+Good design gets you used.
+
+**Distinct design gets you chosen.**
+
+There's a difference.
+
+Don't just make your product easy to use.
+Make it impossible to confuse with anything else.`,
+    category: "Design",
+    author: "Marcus Rivera",
+    date: "2025-04-26",
+    readTime: "5 min read",
+    image: {
+      src: "/images/blog-indistinguishable.jpg",
+      alt: "Abstract blurred interfaces overlapping — a visual metaphor for design convergence",
+      width: 1200,
+      height: 630,
+    },
+  },
   {
     slug: "why-brand-strategy-matters",
     title: "Why Brand Strategy Still Matters in a Performance-Driven World",

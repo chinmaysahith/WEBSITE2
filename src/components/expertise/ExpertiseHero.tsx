@@ -20,7 +20,7 @@ export default function ExpertiseHero() {
   };
 
   return (
-    <section className="relative pt-36 pb-24 md:pt-48 md:pb-32 overflow-hidden border-b border-border">
+    <section className="relative pt-36 pb-24 md:pt-48 md:pb-32 overflow-hidden border-b border-border gradient-hero gradient-noise">
       {/* Soft background glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[500px] bg-accent/5 rounded-full blur-3xl -z-10 pointer-events-none" />
       

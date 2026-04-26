@@ -31,6 +31,7 @@ export default function BigCTA() {
     gsap.registerPlugin(ScrollTrigger);
 
     const tweens: gsap.core.Tween[] = [];
+    const triggers: ScrollTrigger[] = [];
 
     [marqueeARef.current, marqueeBRef.current].forEach((el) => {
       if (!el) return;
@@ -43,38 +44,33 @@ export default function BigCTA() {
       );
     });
 
-    tweens.push(
-      gsap.fromTo(
-        headingRef.current,
-        { opacity: 0, y: 30 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 1,
-          ease: "power4.out",
-          scrollTrigger: { trigger: headingRef.current, start: "top 85%" },
-        }
-      )
-    );
+    if (headingRef.current) {
+      const headingSt = ScrollTrigger.create({ trigger: headingRef.current, start: "top 85%" });
+      triggers.push(headingSt);
+      tweens.push(
+        gsap.fromTo(
+          headingRef.current,
+          { opacity: 0, y: 30 },
+          { opacity: 1, y: 0, duration: 1, ease: "power4.out", scrollTrigger: headingSt }
+        )
+      );
+    }
 
-    tweens.push(
-      gsap.fromTo(
-        btnRef.current,
-        { opacity: 0, scale: 0.9 },
-        {
-          opacity: 1,
-          scale: 1,
-          duration: 0.8,
-          delay: 0.2,
-          ease: "back.out(1.7)",
-          scrollTrigger: { trigger: btnRef.current, start: "top 90%" },
-        }
-      )
-    );
+    if (btnRef.current) {
+      const btnSt = ScrollTrigger.create({ trigger: btnRef.current, start: "top 90%" });
+      triggers.push(btnSt);
+      tweens.push(
+        gsap.fromTo(
+          btnRef.current,
+          { opacity: 0, scale: 0.9 },
+          { opacity: 1, scale: 1, duration: 0.8, delay: 0.2, ease: "back.out(1.7)", scrollTrigger: btnSt }
+        )
+      );
+    }
 
     return () => {
       tweens.forEach((t) => t.kill());
-      ScrollTrigger.getAll().forEach((t) => t.kill());
+      triggers.forEach((t) => t.kill());
     };
   }, []);
 
@@ -93,16 +89,16 @@ export default function BigCTA() {
             className="text-3xl md:text-5xl font-bold max-w-3xl leading-tight mb-12 opacity-0 font-display"
             style={{ color: "#F1F5F9" }}
           >
-            You&apos;ve reached the <span className="font-accent" style={{ color: "#93c5fd" }}>end</span> —{" "}
+            You&apos;ve reached the <span className="font-editorial" style={{ color: "#93c5fd" }}>end</span> —{" "}
             <span style={{ color: "#94A3B8" }}>
-              now let&apos;s start something <span className="font-accent" style={{ color: "#e2e8f0" }}>new!</span>
+              now let&apos;s start something <span className="font-editorial" style={{ color: "#e2e8f0" }}>new!</span>
             </span>
           </h2>
 
           <Link href="/contact">
         <button
             ref={btnRef}
-            className="heartbeat opacity-0 flex items-center gap-2 px-10 py-4 rounded-full font-semibold text-sm cursor-pointer"
+            className="opacity-0 flex items-center gap-2 px-10 py-4 rounded-full font-semibold text-sm cursor-pointer"
             style={{ background: "#FFFFFF", color: "#080808" }}
             onMouseEnter={(e) =>
             gsap.to(e.currentTarget, { scale: 1.06, duration: 0.3, ease: "power2.out" })

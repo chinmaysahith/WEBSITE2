@@ -1,317 +1,433 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
-import {
-  motion,
-  useScroll,
-  useMotionValueEvent,
-  AnimatePresence,
-} from "framer-motion";
+import { useRef, useState, useEffect, useCallback } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { featuredCases } from "@/lib/data";
 
-/**
- * CaseReel — Nakula-style stacked card reveal
- *
- * Scroll down → current image slides UP and fades, next image slides UP from below.
- * Left side: big numeral (01, 02, 03) + title + subtitle, all synced to active card.
- *
- * Key fixes from prior version:
- *   • Card stage has overflow-hidden — exits no longer visible outside frame
- *   • Card enter/exit uses full viewport travel (100%) with eased timing
- *   • Numeral/text/card all share a single direction + key so they animate together
- *   • Side nav click jumps to that card's scroll section
- */
-export default function CaseReel() {
-  const containerRef = useRef<HTMLElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [direction, setDirection] = useState<1 | -1>(1);
-  const [isDesktop, setIsDesktop] = useState(false);
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  const [mounted, setMounted] = useState(false);
+gsap.registerPlugin(ScrollTrigger);
 
-  useEffect(() => {
-    setMounted(true);
-    const desktopQuery = window.matchMedia("(min-width: 1024px)");
-    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+// ── Desktop Pinned Reel ───────────────────────────────────
+function DesktopReel() {
+  const wrapRef = useRef<HTMLElement>(null);
+  const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const [active, setActive] = useState(0);
 
-    const updateDesktop = () => setIsDesktop(desktopQuery.matches);
-    const updateMotion = () => setPrefersReducedMotion(motionQuery.matches);
-
-    updateDesktop();
-    updateMotion();
-    desktopQuery.addEventListener("change", updateDesktop);
-    motionQuery.addEventListener("change", updateMotion);
-    return () => {
-      desktopQuery.removeEventListener("change", updateDesktop);
-      motionQuery.removeEventListener("change", updateMotion);
-    };
+  const setCardRef = useCallback((el: HTMLDivElement | null, i: number) => {
+    cardsRef.current[i] = el;
   }, []);
 
-  const { scrollYProgress } = useScroll({
-    target: mounted ? containerRef : undefined,
-    offset: ["start start", "end end"],
-  });
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    const cards = cardsRef.current.filter(Boolean) as HTMLDivElement[];
+    if (!wrap || cards.length === 0) return;
 
-  const useStackedLayout = !isDesktop || !mounted || prefersReducedMotion;
+    const total = cards.length;
+    const peakOf = (i: number) => (i + 0.5) / total;
+    const halfSlice = 0.5 / total;
+    const ease = (t: number) => t * t * (3 - 2 * t);
 
-  // Map scroll progress → active index. Each card owns 1/total of the range.
-  useMotionValueEvent(scrollYProgress, "change", (progress) => {
-    const total = featuredCases.length;
-    const clamped = Math.min(Math.max(progress, 0), 0.9999);
-    const next = Math.floor(clamped * total);
-    setActiveIndex((prev) => {
-      if (next === prev) return prev;
-      setDirection(next > prev ? 1 : -1);
-      return next;
-    });
-  });
+    const ctx = gsap.context(() => {
+      ScrollTrigger.create({
+        trigger: wrap,
+        start: "top top",
+        end: "bottom bottom",
+        scrub: 0.15,
+        onUpdate: (self) => {
+          const p = self.progress;
+          let activeIdx = 0;
+          let closestDist = Infinity;
 
-  const getSubtitle = (c: (typeof featuredCases)[number]) =>
-    c.subtitle ?? c.description;
+          cards.forEach((card, i) => {
+            const peak = peakOf(i);
+            const rawDist = (p - peak) / halfSlice;
+            const absDist = Math.min(Math.abs(rawDist), 1.5);
 
-  // ── Mobile / reduced-motion fallback ───────────────────────────
-  if (useStackedLayout) {
-    return (
-      <section
-        aria-label="Featured work"
-        className="border-t border-[var(--border)] bg-[var(--bg)]"
-      >
-        {featuredCases.map((c) => (
-          <article
-            key={c.slug}
-            className="mx-auto max-w-6xl px-6 py-24 sm:px-8"
-          >
-            <div className="mb-6 font-numeral text-7xl font-normal tracking-tight text-[var(--text)]/25">
-              {c.index}
-            </div>
-            <h3 className="mb-3 font-display text-3xl font-normal tracking-tight text-[var(--text)] sm:text-4xl">
-              {c.title}
-            </h3>
-            <p className="mb-8 max-w-md font-sans text-base text-[var(--text-muted)]">
-              {getSubtitle(c)}
-            </p>
-            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-[var(--surface)] shadow-2xl shadow-black/20">
-              <Image
-                src={c.image.src}
-                alt={c.image.alt}
-                fill
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover"
-              />
-            </div>
-            <Link
-              href={`/case-studies/${c.slug}`}
-              className="mt-6 inline-flex items-center gap-2 font-sans text-sm font-medium text-[var(--text)] underline underline-offset-4"
-            >
-              View case study →
-            </Link>
-          </article>
-        ))}
-      </section>
-    );
-  }
+            const scale = 1 - ease(Math.min(absDist, 1)) * 0.3;
+            const y = -rawDist * 35;
+            const rotate = rawDist * 2;
 
-  // ── Desktop pinned reel ────────────────────────────────────────
-  const active = featuredCases[activeIndex];
-  const easeOut = [0.22, 1, 0.36, 1] as const;
+            const fadeStart = 0.6;
+            const opacity =
+              absDist < fadeStart
+                ? 1
+                : Math.max(0, 1 - (absDist - fadeStart) / (1.2 - fadeStart));
 
-  const DURATION = 0.75;
+            const z = Math.round((1 - absDist) * 100);
 
-  // Numeral: vertical odometer roll — direction-aware
-  const numeralVariants = {
-    enter: (dir: number) => ({
-      y: dir > 0 ? "40%" : "-40%",
-      opacity: 0,
-      filter: "blur(8px)",
-    }),
-    center: { y: "0%", opacity: 1, filter: "blur(0px)" },
-    exit: (dir: number) => ({
-      y: dir > 0 ? "-40%" : "40%",
-      opacity: 0,
-      filter: "blur(8px)",
-    }),
-  };
+            card.style.transform = `translate3d(-50%, calc(-50% + ${y}vh), 0) scale(${scale}) rotate(${rotate}deg)`;
+            card.style.opacity = String(opacity);
+            card.style.zIndex = String(z);
 
-  // Card: slides fully in from below, fully out above (scroll-down case)
-  const cardVariants = {
-    enter: (dir: number) => ({
-      y: dir > 0 ? "100%" : "-100%",
-    }),
-    center: { y: "0%" },
-    exit: (dir: number) => ({
-      y: dir > 0 ? "-100%" : "100%",
-      opacity: 0,
-    }),
-  };
+            if (absDist < closestDist) {
+              closestDist = absDist;
+              activeIdx = i;
+            }
+          });
 
-  // Text: subtle fade + lift
-  const textVariants = {
-    enter: (dir: number) => ({
-      opacity: 0,
-      y: dir > 0 ? 12 : -12,
-      filter: "blur(8px)",
-    }),
-    center: { opacity: 1, y: 0, filter: "blur(0px)" },
-    exit: (dir: number) => ({
-      opacity: 0,
-      y: dir > 0 ? -12 : 12,
-      filter: "blur(8px)",
-    }),
-  };
+          setActive((prev) => (prev !== activeIdx ? activeIdx : prev));
+        },
+      });
+    }, wrap);
 
-  // Side nav click: scroll to that card's section
-  const handleNavClick = (i: number) => {
-    const el = containerRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const total = featuredCases.length;
-    const sectionHeight = rect.height / total;
-    const targetY = window.scrollY + rect.top + sectionHeight * i;
-    window.scrollTo({ top: targetY, behavior: "smooth" });
-  };
+    return () => ctx.revert();
+  }, []);
+
+  const ac = featuredCases[active];
 
   return (
     <section
-      ref={containerRef}
-      aria-label="Featured work"
-      className="relative border-t border-[var(--border)] bg-[var(--bg)]"
-      style={{ height: `${featuredCases.length * 100}vh` }}
+      ref={wrapRef}
+      aria-label="Our achievements"
+      className="relative"
+      style={{ height: `${featuredCases.length * 150}vh` }}
     >
-      <div className="sticky top-0 flex h-screen items-center overflow-hidden">
-        <div className="mx-auto grid w-full max-w-[1600px] grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] items-center gap-12 px-8 xl:gap-20 xl:px-12 relative z-10">
-          {/* LEFT: numeral + text + side nav */}
-          <div className="relative">
-            {/* Oversized numeral */}
-            <div
-              className="relative mb-12 h-[11rem] overflow-hidden xl:h-[13rem]"
-              aria-hidden="true"
-            >
-              <AnimatePresence
-                mode="popLayout"
-                custom={direction}
-                initial={false}
-              >
-                <motion.div
-                  key={`num-${activeIndex}`}
-                  custom={direction}
-                  variants={numeralVariants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  transition={{ duration: DURATION, ease: easeOut }}
-                  className="absolute inset-0 font-display text-[11rem] font-normal leading-[1] tracking-tight text-[var(--text)]/25 xl:text-[13rem]"
-                >
-                  {active.index}
-                </motion.div>
-              </AnimatePresence>
+      {/* Section gradient bg */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background:
+            "linear-gradient(180deg, var(--bg) 0%, color-mix(in oklab, var(--surface) 80%, var(--accent)) 50%, var(--bg) 100%)",
+        }}
+      />
+
+      <div className="sticky top-0 h-screen w-full overflow-hidden">
+        {/* ── Section heading bar ── */}
+        <div className="absolute top-0 left-0 right-0 z-20 border-b border-[var(--border)]">
+          <div
+            className="flex items-center justify-between"
+            style={{ padding: "1.4rem 3.5vw" }}
+          >
+            <div className="flex items-center gap-5">
+              <div className="h-px w-10 bg-[var(--accent)]" />
+              <span className="font-mono text-[0.7rem] uppercase tracking-[0.22em] text-[var(--text-muted)]">
+                Our Achievements
+              </span>
             </div>
+            <Link
+              href="/case-studies"
+              className="group flex items-center gap-2 font-mono text-[0.7rem] uppercase tracking-[0.18em] text-[var(--text-muted)] transition-colors hover:text-[var(--text)]"
+            >
+              View all work
+              <ArrowRight
+                size={13}
+                className="transition-transform group-hover:translate-x-1"
+              />
+            </Link>
+          </div>
+        </div>
 
-            {/* Title + subtitle + link */}
-            <AnimatePresence mode="popLayout" custom={direction} initial={false}>
-              <motion.div
-                key={`text-${activeIndex}`}
-                custom={direction}
-                variants={textVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                className="w-full"
-                transition={{ duration: DURATION, ease: easeOut }}
-              >
-                <h3 className="mb-5 font-display text-5xl font-normal leading-[1.05] tracking-tight text-[var(--text)] xl:text-6xl">
-                  {active.title}
-                </h3>
-                <p className="mb-10 max-w-sm font-sans text-lg leading-snug text-[var(--text-muted)]">
-                  {getSubtitle(active)}
-                </p>
-                <Link
-                  href={`/case-studies/${active.slug}`}
-                  className="inline-flex items-center gap-2 font-sans text-sm font-medium text-[var(--text)] underline underline-offset-[6px] decoration-[var(--text)]/30 transition-colors hover:decoration-[var(--text)]"
-                >
-                  View case study →
-                </Link>
-              </motion.div>
-            </AnimatePresence>
-
-            {/* Side nav */}
-            <nav
-              aria-label="Featured cases"
-              className="mt-20 flex flex-col gap-3"
+        {/* ── Main layout ── */}
+        <div className="relative h-full w-full flex" style={{ paddingTop: "3.8rem" }}>
+          {/* ── LEFT: info panel ── */}
+          <div
+            className="relative flex flex-col justify-center w-[42%] shrink-0 border-r border-[var(--border)]"
+            style={{ padding: "6vh 4vw 5vh 5vw" }}
+          >
+            {/* Big numeral — subtle watermark */}
+            <div
+              aria-hidden="true"
+              className="relative select-none mb-4"
+              style={{ height: "clamp(100px, 20vh, 220px)" }}
             >
               {featuredCases.map((c, i) => {
-                const isActive = i === activeIndex;
+                const isActive = i === active;
+                const isPast = i < active;
                 return (
-                  <button
+                  <span
                     key={c.slug}
-                    type="button"
-                    onClick={() => handleNavClick(i)}
-                    className="group flex items-center gap-4 text-left"
+                    className="pointer-events-none absolute inset-0 flex items-end font-display font-bold leading-[0.85] tracking-[-0.04em]"
+                    style={{
+                      fontSize: "clamp(6rem, 14vw, 14rem)",
+                      color: "var(--text)",
+                      opacity: isActive ? 0.07 : 0,
+                      transform: isActive
+                        ? "translateY(0) scale(1) translateZ(0)"
+                        : isPast
+                        ? "translateY(-50px) scale(0.95) translateZ(0)"
+                        : "translateY(50px) scale(1.05) translateZ(0)",
+                      transition:
+                        "opacity 0.8s cubic-bezier(0.22,1,0.36,1), transform 0.8s cubic-bezier(0.22,1,0.36,1)",
+                    }}
                   >
-                    <span
-                      className={`h-px transition-all duration-500 ${isActive
-                        ? "w-16 bg-[var(--accent)]"
-                        : "w-8 bg-[var(--border)]"
-                        }`}
-                    />
-                    <span
-                      className={`font-mono text-xs uppercase tracking-[0.2em] transition-colors duration-300 ${isActive
-                        ? "text-[var(--text)]"
-                        : "text-[var(--text-muted)]"
-                        }`}
-                    >
-                      {c.title}
-                    </span>
-                  </button>
+                    {c.index.replace(".", "")}
+                  </span>
                 );
               })}
-            </nav>
+            </div>
+
+            {/* Meta content — vertical mask-slide */}
+            <div className="relative" style={{ minHeight: 240 }}>
+              {featuredCases.map((c, i) => {
+                const isActive = i === active;
+                const isPast = i < active;
+                const dir = isPast ? -1 : 1;
+                return (
+                  <div
+                    key={c.slug}
+                    className="absolute inset-x-0 top-0 max-w-[440px]"
+                    style={{
+                      pointerEvents: isActive ? "auto" : "none",
+                    }}
+                  >
+                    {/* Industry pill */}
+                    <div className="overflow-hidden mb-5">
+                      <div
+                        className="flex items-center gap-3"
+                        style={{
+                          transform: isActive ? "translateY(0)" : `translateY(${dir * 110}%)`,
+                          transition: "transform 0.55s cubic-bezier(0.65, 0, 0.35, 1)",
+                          transitionDelay: isActive ? "0.05s" : "0s",
+                        }}
+                      >
+                        <span className="inline-flex items-center rounded-full border border-[var(--border)] px-3 py-1 font-mono text-[0.65rem] uppercase tracking-[0.16em] text-[var(--text-muted)]">
+                          {c.industry}
+                        </span>
+                        <span className="font-mono text-[0.65rem] text-[var(--text-muted)]">
+                          {c.year}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Title */}
+                    <div className="overflow-hidden mb-4">
+                      <h3
+                        className="font-display font-bold leading-[1.08] tracking-[-0.02em] text-[var(--text)]"
+                        style={{
+                          fontSize: "clamp(1.6rem, 2.4vw, 2.6rem)",
+                          transform: isActive ? "translateY(0)" : `translateY(${dir * 110}%)`,
+                          transition: "transform 0.6s cubic-bezier(0.65, 0, 0.35, 1)",
+                          transitionDelay: isActive ? "0.1s" : "0s",
+                        }}
+                      >
+                        {c.title}
+                      </h3>
+                    </div>
+
+                    {/* Description */}
+                    <div className="overflow-hidden mb-8">
+                      <p
+                        className="max-w-sm font-sans text-[0.95rem] leading-[1.55] text-[var(--text-muted)]"
+                        style={{
+                          transform: isActive ? "translateY(0)" : `translateY(${dir * 110}%)`,
+                          transition: "transform 0.6s cubic-bezier(0.65, 0, 0.35, 1)",
+                          transitionDelay: isActive ? "0.16s" : "0s",
+                        }}
+                      >
+                        {c.subtitle ?? c.description}
+                      </p>
+                    </div>
+
+                    {/* CTA */}
+                    <div className="overflow-hidden">
+                      <div
+                        style={{
+                          transform: isActive ? "translateY(0)" : `translateY(${dir * 110}%)`,
+                          transition: "transform 0.55s cubic-bezier(0.65, 0, 0.35, 1)",
+                          transitionDelay: isActive ? "0.22s" : "0s",
+                        }}
+                      >
+                        <Link
+                          href={`/case-studies/${c.slug}`}
+                          className="group inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-6 py-3 font-sans text-sm font-medium text-[var(--text)] transition-all hover:border-[var(--text)] hover:bg-[var(--text)] hover:text-[var(--bg)]"
+                        >
+                          View case study
+                          <ArrowRight
+                            size={15}
+                            className="transition-transform group-hover:translate-x-1"
+                          />
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Progress */}
+            <div className="mt-auto flex items-center gap-4 border-t border-[var(--border)] pt-5">
+              <div className="flex items-center gap-2">
+                {featuredCases.map((_, i) => (
+                  <div
+                    key={i}
+                    className="rounded-full transition-all duration-500"
+                    style={{
+                      width: i === active ? 24 : 6,
+                      height: 6,
+                      backgroundColor:
+                        i === active ? "var(--text)" : "var(--border)",
+                    }}
+                  />
+                ))}
+              </div>
+              <span className="ml-auto font-mono text-[0.7rem] tracking-[0.18em] text-[var(--text-muted)]">
+                {String(active + 1).padStart(2, "0")} /{" "}
+                {String(featuredCases.length).padStart(2, "0")}
+              </span>
+            </div>
           </div>
 
-          {/* RIGHT: image stage */}
-          <div className="relative" style={{ perspective: "1200px" }}>
-            {/* Atmospheric radial gradient behind card */}
+          {/* ── RIGHT: floating stacked images (Polaroid frames) ── */}
+          <div className="relative flex-1 overflow-hidden">
+            {/* Ambient glow */}
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute -inset-24 -z-10"
+              className="pointer-events-none absolute inset-0"
               style={{
                 background:
-                  "radial-gradient(ellipse at 50% 45%, color-mix(in oklab, var(--accent) 12%, transparent) 0%, color-mix(in oklab, var(--text) 6%, transparent) 35%, transparent 70%)",
-                filter: "blur(40px)",
+                  "radial-gradient(ellipse at 50% 50%, color-mix(in oklab, var(--accent) 8%, transparent) 0%, transparent 55%)",
+                filter: "blur(60px)",
               }}
             />
 
-            {/* STAGE: overflow-hidden clips the sliding cards to frame */}
-            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl">
-              <AnimatePresence custom={direction} initial={false}>
-                <motion.div
-                  key={`card-${activeIndex}`}
-                  custom={direction}
-                  variants={cardVariants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  transition={{
-                    duration: DURATION,
-                    ease: easeOut,
+            <div className="relative h-full w-full">
+              {featuredCases.map((c, i) => (
+                <div
+                  key={c.slug}
+                  ref={(el) => setCardRef(el, i)}
+                  className="absolute flex flex-col"
+                  style={{
+                    top: "50%",
+                    left: "50%",
+                    width: "clamp(340px, 42vw, 620px)",
+                    height: "clamp(440px, 72vh, 800px)",
+                    transform: "translate3d(-50%, -50%, 0) scale(0.4)",
+                    opacity: 0,
+                    borderRadius: 16,
+                    backgroundColor: "#ffffff",
+                    padding: "10px 10px 32px 10px",
+                    willChange: "transform, opacity",
+                    boxShadow:
+                      "0 50px 100px -30px rgba(0,0,0,0.4), 0 20px 50px -15px rgba(0,0,0,0.25)",
                   }}
-                  className="absolute inset-0 overflow-hidden rounded-xl bg-[var(--surface)] shadow-[0_30px_80px_-20px_rgba(0,0,0,0.35)] will-change-transform"
                 >
-                  <Image
-                    src={active.image.src}
-                    alt={active.image.alt}
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 55vw"
-                    className="object-cover"
-                    priority={activeIndex === 0}
-                  />
-                </motion.div>
-              </AnimatePresence>
+                  {/* Image area */}
+                  <div
+                    className="relative flex-1 overflow-hidden"
+                    style={{ borderRadius: 8 }}
+                  >
+                    <Image
+                      src={c.image.src}
+                      alt={c.image.alt}
+                      fill
+                      sizes="(max-width: 1024px) 80vw, 42vw"
+                      className="object-cover"
+                      priority={i === 0}
+                    />
+                    {/* Soft inner vignette */}
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-0"
+                      style={{
+                        borderRadius: 8,
+                        boxShadow: "inset 0 0 60px rgba(0,0,0,0.15)",
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </div>
     </section>
   );
+}
+
+// ── Mobile fallback ───────────────────────────────────────
+function StackedLayout() {
+  return (
+    <section
+      aria-label="Our achievements"
+      className="border-t border-[var(--border)] bg-[var(--bg)]"
+    >
+      {/* Section heading */}
+      <div className="container-wide pt-20 pb-4 sm:pt-24">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="h-px w-8 bg-[var(--accent)]" />
+          <span className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-[var(--text-muted)]">
+            Our Achievements
+          </span>
+        </div>
+        <h2 className="text-section-heading text-text max-w-lg">
+          Work that drives results
+        </h2>
+      </div>
+
+      {featuredCases.map((c) => (
+        <article key={c.slug} className="mx-auto max-w-6xl px-6 py-16 sm:px-8">
+          <div className="mb-4 flex items-center gap-3">
+            <span className="inline-flex items-center rounded-full border border-[var(--border)] px-3 py-1 font-mono text-[0.65rem] uppercase tracking-[0.16em] text-[var(--text-muted)]">
+              {c.industry}
+            </span>
+            <span className="font-mono text-[0.65rem] text-[var(--text-muted)]">
+              {c.year}
+            </span>
+          </div>
+          <h3
+            className="mb-3 font-display font-bold leading-[1.08] tracking-[-0.02em] text-[var(--text)]"
+            style={{ fontSize: "clamp(1.6rem, 3vw, 2.4rem)" }}
+          >
+            {c.title}
+          </h3>
+          <p className="mb-8 max-w-md font-sans text-[0.95rem] leading-[1.55] text-[var(--text-muted)]">
+            {c.subtitle ?? c.description}
+          </p>
+
+          {/* Polaroid-style image frame */}
+          <div
+            className="mb-6 w-full overflow-hidden rounded-xl"
+            style={{
+              backgroundColor: "#ffffff",
+              padding: "8px 8px 28px 8px",
+              boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)",
+            }}
+          >
+            <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg">
+              <Image
+                src={c.image.src}
+                alt={c.image.alt}
+                fill
+                sizes="100vw"
+                className="object-cover"
+              />
+            </div>
+          </div>
+
+          <Link
+            href={`/case-studies/${c.slug}`}
+            className="group inline-flex items-center gap-2 font-sans text-sm font-medium text-[var(--text)] underline underline-offset-4"
+          >
+            View case study
+            <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+          </Link>
+        </article>
+      ))}
+    </section>
+  );
+}
+
+// ── Main export ───────────────────────────────────────────
+export default function CaseReel() {
+  const [mode, setMode] = useState<"stacked" | "desktop">("stacked");
+
+  useEffect(() => {
+    const desktopQ = window.matchMedia("(min-width: 1024px)");
+    const motionQ = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () =>
+      setMode(desktopQ.matches && !motionQ.matches ? "desktop" : "stacked");
+    update();
+    desktopQ.addEventListener("change", update);
+    motionQ.addEventListener("change", update);
+    return () => {
+      desktopQ.removeEventListener("change", update);
+      motionQ.removeEventListener("change", update);
+    };
+  }, []);
+
+  return mode === "desktop" ? <DesktopReel /> : <StackedLayout />;
 }

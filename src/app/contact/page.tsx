@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <>
-      <section className="pt-36 pb-24 md:pt-44 md:pb-32">
+      <section className="pt-36 pb-24 md:pt-44 md:pb-32 gradient-hero relative gradient-noise overflow-hidden">
         <div className="container-wide">
           <FadeIn>
             <p className="text-eyebrow text-accent mb-4">Contact</p>
