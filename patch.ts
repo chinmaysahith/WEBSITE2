@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getCliClient } from 'sanity/cli'
 
 const client = getCliClient()
