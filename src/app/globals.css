@@ -75,27 +75,56 @@
   }
 }
 
-/* ── Blob gradient animations (Hero) ──────────────────── */
+/* ── Blob gradient animations ─────────────────────────── */
 @keyframes blob-a {
   0%, 100% { transform: translate(0%, 0%) scale(1); }
-  30%       { transform: translate(9%, -14%) scale(1.1); }
-  65%       { transform: translate(-6%, 10%) scale(0.93); }
+  25%       { transform: translate(5%, -8%) scale(1.06); }
+  55%       { transform: translate(-4%, 6%) scale(0.95); }
+  80%       { transform: translate(7%, 4%) scale(1.03); }
 }
 @keyframes blob-b {
   0%, 100% { transform: translate(0%, 0%) scale(1); }
-  35%       { transform: translate(-11%, 9%) scale(0.9); }
-  70%       { transform: translate(8%, -11%) scale(1.07); }
+  30%       { transform: translate(-7%, 5%) scale(0.93); }
+  60%       { transform: translate(5%, -7%) scale(1.05); }
+  85%       { transform: translate(-3%, -4%) scale(0.98); }
 }
 @keyframes blob-c {
   0%, 100% { transform: translate(0%, 0%) scale(1); }
-  40%       { transform: translate(11%, 11%) scale(0.88); }
-  75%       { transform: translate(-9%, -7%) scale(1.09); }
+  35%       { transform: translate(6%, 7%) scale(0.91); }
+  65%       { transform: translate(-6%, -4%) scale(1.07); }
+  90%       { transform: translate(3%, 5%) scale(0.96); }
+}
+
+@keyframes blob-entrance {
+  0% { 
+    opacity: 0; 
+    transform: scale(0.2) translate(10%, -10%); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: scale(1) translate(0%, 0%); 
+  }
+}
+
+/* Slow-drift classes used by GrainBlobs component */
+.blob-drift-a {
+  transform-origin: top right;
+  animation: 
+    blob-entrance 2.5s cubic-bezier(0.16, 1, 0.3, 1) forwards,
+    blob-a 18s ease-in-out 2.5s infinite;
+}
+.blob-drift-b {
+  animation: blob-b 22s ease-in-out infinite;
+}
+.blob-drift-c {
+  animation: blob-c 26s ease-in-out infinite;
 }
 
 /* ── Base Styles ──────────────────────────────────────── */
 html {
   /* NOTE: scroll-behavior: smooth removed — conflicts with GSAP ScrollTrigger scrub */
   -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -104,6 +133,7 @@ body {
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 /* ── Typography Scale ─────────────────────────────────── */
@@ -190,12 +220,12 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  opacity: 0.025;
+  opacity: 0.48;
   pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  background-size: 128px 128px;
-  mix-blend-mode: multiply;
-  z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' seed='15' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  mix-blend-mode: overlay;
+  z-index: 1;
 }
 
 /* ── Focus Styles (WCAG AA) ───────────────────────────── */
@@ -209,6 +239,36 @@ body {
 ::selection {
   background-color: var(--text);
   color: var(--bg);
+}
+
+/* ── Smooth link & button transitions ────────────────── */
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Image rendering ──────────────────────────────────── */
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ── Skeleton loading shimmer ─────────────────────────── */
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position:  200% 0; }
+}
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--border-light) 25%,
+    var(--border) 50%,
+    var(--border-light) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
 }
 
 /* ── Reduced Motion ───────────────────────────────────── */

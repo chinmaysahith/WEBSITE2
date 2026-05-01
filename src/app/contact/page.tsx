@@ -3,6 +3,7 @@ import { Mail, Phone, MapPin } from "lucide-react";
 import FadeIn from "@/components/shared/FadeIn";
 import ContactForm from "@/components/contact/ContactForm";
 import { HighlightText } from "@/components/ui/HighlightText";
+import GrainBlobs from "@/components/shared/GrainBlobs";
 import { contactInfo } from "@/lib/data";
 
 export const metadata: Metadata = {
@@ -13,8 +14,10 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <>
-      <section className="pt-36 pb-24 md:pt-44 md:pb-32 gradient-hero relative gradient-noise overflow-hidden">
+    <div className="relative overflow-hidden" style={{ background: "var(--bg)" }}>
+      {/* Blush warmth — softens the contact page, feels inviting */}
+      <GrainBlobs variant="blush" intensity={0.11} animate={true} />
+      <section className="pt-36 pb-24 md:pt-44 md:pb-32 relative z-10">
         <div className="container-wide">
           <FadeIn>
             <p className="text-eyebrow text-accent mb-4">Contact</p>
@@ -104,6 +107,6 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }

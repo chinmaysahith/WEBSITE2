@@ -35,12 +35,18 @@ export async function generateMetadata({
 
   if (!post) return {};
 
+  const title = post.metaTitle || post.title;
+  const description = post.metaDescription || post.excerpt;
+
   return {
-    title: post.title,
-    description: post.excerpt,
+    title,
+    description,
+    alternates: {
+      canonical: `https://apslock.com/blogs/${post.slug}`,
+    },
     openGraph: {
-      title: post.title,
-      description: post.excerpt,
+      title,
+      description,
       type: "article",
       publishedTime: post.publishedAt || post.date,
       authors: [post.author],
@@ -55,8 +61,8 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: post.title,
-      description: post.excerpt,
+      title,
+      description,
       images: post.image?.src ? [post.image.src] : [],
     },
   };
@@ -85,9 +91,26 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     .filter((p: any) => p.category === post.category && p.slug !== post.slug)
     .slice(0, 3);
 
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": post.title,
+    "image": post.image?.src ? [post.image.src] : [],
+    "datePublished": post.publishedAt || post.date,
+    "dateModified": post.publishedAt || post.date,
+    "author": [{
+      "@type": "Person",
+      "name": post.author,
+    }],
+    "description": post.metaDescription || post.excerpt,
+  };
+
   return (
     <>
-      {/* Reading Progress Bar */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      />
       <BlogPostContent post={post} relatedPosts={relatedPosts} />
     </>
   );

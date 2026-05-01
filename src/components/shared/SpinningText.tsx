@@ -15,7 +15,7 @@ export default function SpinningText() {
     let lastScroll = window.scrollY;
     let raf: number;
 
-    const BASE_SPEED = 0.015; // degrees per frame at 60fps — slow ambient spin
+    const BASE_SPEED = 0.08; // degrees per frame — more noticeable ambient spin
 
     const tick = () => {
       const currentScroll = window.scrollY;
@@ -23,7 +23,7 @@ export default function SpinningText() {
       lastScroll = currentScroll;
 
       // Base rotation + scroll boost (scroll faster → spin faster)
-      angle += BASE_SPEED + delta * 0.04;
+      angle += BASE_SPEED + delta * 0.1;
       el.style.transform = `rotate(${angle}deg)`;
 
       raf = requestAnimationFrame(tick);
@@ -37,7 +37,7 @@ export default function SpinningText() {
     <div
       ref={ref}
       aria-hidden="true"
-      className="absolute -top-[25vh] -right-[15vw] w-[90vh] h-[90vh] text-border/40 pointer-events-none select-none z-0 hidden lg:block"
+      className="absolute -top-[25vh] -right-[15vw] w-[90vh] h-[90vh] text-text-muted/40 pointer-events-none select-none z-0 hidden lg:block"
     >
       <svg viewBox="0 0 200 200" className="w-full h-full">
         <path

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import FadeIn from "@/components/shared/FadeIn";
 import BlogFilter from "@/components/blog/BlogFilter";
+import GrainBlobs from "@/components/shared/GrainBlobs";
 import { blogPosts as fallbackPosts, blogCategories } from "@/lib/data";
 import { client } from "@/sanity/lib/client";
 import { getPostsQuery } from "@/sanity/lib/queries";
@@ -43,9 +44,11 @@ export default async function BlogsPage() {
   const categoriesToUse = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ? dynamicCategories : blogCategories;
 
   return (
-    <>
+    <div className="relative overflow-hidden" style={{ background: "var(--bg)" }}>
+      <GrainBlobs variant="amber" intensity={0.12} animate={true} />
+
       {/* Hero */}
-      <section className="pt-36 pb-16 md:pt-44 md:pb-20 gradient-hero relative gradient-noise overflow-hidden">
+      <section className="pt-36 pb-16 md:pt-44 md:pb-20 relative z-10">
         <div className="container-wide">
           <FadeIn>
             <p className="text-eyebrow text-accent mb-4">Blog</p>
@@ -59,12 +62,12 @@ export default async function BlogsPage() {
         </div>
       </section>
 
-      {/* Filter + List */}
-      <section className="pb-24 md:pb-32 gradient-section-cool relative gradient-noise overflow-hidden">
+      {/* Filter + List — transparent, same blob shows through */}
+      <section className="pb-24 md:pb-32 relative z-10">
         <div className="container-wide">
           <BlogFilter posts={posts} categories={categoriesToUse} />
         </div>
       </section>
-    </>
+    </div>
   );
 }

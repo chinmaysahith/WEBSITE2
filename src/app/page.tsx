@@ -3,6 +3,7 @@ import Hero from "@/components/home/Hero";
 import CaseReel from "@/components/home/CaseReel";
 import AnimatedCapabilities from "@/components/home/AnimatedCapabilities";
 import BlogPreview from "@/components/home/BlogPreview";
+import GrainBlobs from "@/components/shared/GrainBlobs";
 import { heroContent, capabilities, blogPosts } from "@/lib/data";
 
 export const metadata: Metadata = {
@@ -13,11 +14,15 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <>
-      <Hero content={heroContent} />
-      <CaseReel />
-      <AnimatedCapabilities items={capabilities} />
-      <BlogPreview posts={blogPosts} />
-    </>
+    <div className="relative overflow-clip" style={{ background: "var(--bg)" }}>
+      <GrainBlobs variant="amber" intensity={0.12} animate={true} />
+      
+      <div className="relative z-10">
+        <Hero content={heroContent} />
+        <CaseReel />
+        <AnimatedCapabilities items={capabilities} />
+        <BlogPreview posts={blogPosts} />
+      </div>
+    </div>
   );
 }

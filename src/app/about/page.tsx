@@ -4,6 +4,7 @@ import ValuesSection from "@/components/about/ValuesSection";
 import WorkProcess from "@/components/about/WorkProcess";
 import TeamSection from "@/components/about/TeamSection";
 import BigCTA from "@/components/shared/BigCTA";
+import GrainBlobs from "@/components/shared/GrainBlobs";
 import { values, workProcess } from "@/lib/data";
 
 export const metadata: Metadata = {
@@ -14,9 +15,12 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <>
+    <div className="relative overflow-hidden" style={{ background: "var(--bg)" }}>
+      {/* Sage tint — feels natural, grounded for an 'about' page */}
+      <GrainBlobs variant="sage" intensity={0.11} animate={true} />
+
       {/* Hero */}
-      <section className="pt-36 pb-20 md:pt-44 md:pb-28 gradient-hero relative gradient-noise overflow-hidden">
+      <section className="pt-36 pb-20 md:pt-44 md:pb-28 relative z-10">
         <div className="container-wide">
           <FadeIn>
             <p className="text-eyebrow text-accent mb-4">About Us</p>
@@ -33,16 +37,16 @@ export default function AboutPage() {
       </section>
 
       {/* Values */}
-      <ValuesSection values={values} />
+      <div className="relative z-10"><ValuesSection values={values} /></div>
 
       {/* Work Process */}
-      <WorkProcess process={workProcess} />
+      <div className="relative z-10"><WorkProcess process={workProcess} /></div>
 
       {/* Team */}
-      <TeamSection />
+      <div className="relative z-10"><TeamSection /></div>
 
       {/* CTA */}
-      <BigCTA />
-    </>
+      <div className="relative z-10"><BigCTA /></div>
+    </div>
   );
 }

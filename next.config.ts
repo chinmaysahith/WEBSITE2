@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
+  compress: true,
   images: {
     remotePatterns: [
       {
@@ -15,8 +17,12 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "cdn.sanity.io",
       },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
     ],
-    unoptimized: true,
+    formats: ["image/avif", "image/webp"],
   },
 };
 

@@ -12,7 +12,7 @@ export default function BlogPreview({ posts }: BlogPreviewProps) {
   const latestPosts = posts.slice(0, 4);
 
   return (
-    <section className="py-24 md:py-32 lg:py-40 gradient-section-cool relative gradient-noise overflow-hidden">
+    <section className="py-24 md:py-32 lg:py-40 relative overflow-hidden">
       <div className="container-wide">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16">
           <FadeIn>

@@ -6,6 +6,7 @@ import CaseGrid from "@/components/case-studies/CaseGrid";
 import ProcessSteps from "@/components/case-studies/ProcessSteps";
 import SpinningText from "@/components/shared/SpinningText";
 import { HighlightText } from "@/components/ui/HighlightText";
+import GrainBlobs from "@/components/shared/GrainBlobs";
 import { caseStudies, processSteps } from "@/lib/data";
 
 export const metadata: Metadata = {
@@ -16,9 +17,12 @@ export const metadata: Metadata = {
 
 export default function CaseStudiesPage() {
   return (
-    <>
+    <div className="relative overflow-hidden" style={{ background: "var(--bg)" }}>
+      {/* Warm tone — grounded, confident for a work/results page */}
+      <GrainBlobs variant="amber" intensity={0.12} animate={true} />
+
       {/* Hero */}
-      <section className="relative pt-36 pb-20 md:pt-44 md:pb-28 overflow-hidden gradient-hero gradient-noise">
+      <section className="relative pt-36 pb-20 md:pt-44 md:pb-28 z-10">
         <SpinningText />
         <div className="container-wide">
           <FadeIn>
@@ -35,19 +39,19 @@ export default function CaseStudiesPage() {
       </section>
 
       {/* Grid */}
-      <section className="pb-24 md:pb-32">
+      <section className="pb-24 md:pb-32 relative z-10">
         <div className="container-wide">
           <CaseGrid studies={caseStudies} />
         </div>
       </section>
 
       {/* Process */}
-      <div className="gradient-section-warm relative gradient-noise overflow-hidden">
+      <div className="relative z-10">
         <ProcessSteps steps={processSteps} />
       </div>
 
       {/* CTA */}
-      <section className="py-24 md:py-32 gradient-cta relative gradient-noise overflow-hidden">
+      <section className="py-24 md:py-32 relative z-10">
         <div className="container-wide text-center">
           <FadeIn>
             <h2 className="text-section-heading text-text mb-6">
@@ -70,6 +74,6 @@ export default function CaseStudiesPage() {
           </FadeIn>
         </div>
       </section>
-    </>
+    </div>
   );
 }

@@ -35,6 +35,22 @@ export const blockContentType = defineType({
               },
             ],
           },
+          {
+            name: 'internalLink',
+            type: 'object',
+            title: 'Internal link',
+            fields: [
+              {
+                name: 'reference',
+                type: 'reference',
+                title: 'Reference',
+                to: [
+                  { type: 'post' },
+                  { type: 'caseStudy' },
+                ],
+              },
+            ],
+          },
         ],
       },
     }),

@@ -1,8 +1,8 @@
 import {defineField, defineType, defineArrayMember} from 'sanity'
 
-export const postType = defineType({
-  name: 'post',
-  title: 'Post',
+export const caseStudyType = defineType({
+  name: 'caseStudy',
+  title: 'Case Study',
   type: 'document',
   groups: [
     { name: 'content', title: 'Content', default: true },
@@ -11,16 +11,30 @@ export const postType = defineType({
   fields: [
     defineField({
       name: 'title',
+      title: 'Title',
+      type: 'string',
+      group: 'content',
+    }),
+    defineField({
+      name: 'client',
+      title: 'Client Name',
       type: 'string',
       group: 'content',
     }),
     defineField({
       name: 'slug',
+      title: 'Slug',
       type: 'slug',
       options: {
         source: 'title',
         maxLength: 96,
       },
+      group: 'content',
+    }),
+    defineField({
+      name: 'category',
+      title: 'Category / Industry',
+      type: 'string',
       group: 'content',
     }),
     defineField({
@@ -39,13 +53,37 @@ export const postType = defineType({
       rows: 3,
     }),
     defineField({
-      name: 'author',
-      type: 'reference',
-      to: {type: 'author'},
+      name: 'description',
+      title: 'Summary / Description',
+      type: 'text',
+      group: 'content',
+      rows: 4,
+    }),
+    defineField({
+      name: 'metrics',
+      title: 'Metrics',
+      type: 'array',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          fields: [
+            {name: 'label', type: 'string', title: 'Label'},
+            {name: 'value', type: 'string', title: 'Value'},
+          ],
+        }),
+      ],
+      group: 'content',
+    }),
+    defineField({
+      name: 'servicesUsed',
+      title: 'Services Used',
+      type: 'array',
+      of: [defineArrayMember({type: 'string'})],
       group: 'content',
     }),
     defineField({
       name: 'mainImage',
+      title: 'Main Image',
       type: 'image',
       options: {
         hotspot: true,
@@ -61,30 +99,8 @@ export const postType = defineType({
       group: 'content',
     }),
     defineField({
-      name: 'categories',
-      type: 'array',
-      of: [defineArrayMember({type: 'reference', to: {type: 'category'}})],
-      group: 'content',
-    }),
-    defineField({
-      name: 'publishedAt',
-      type: 'datetime',
-      group: 'content',
-    }),
-    defineField({
-      name: 'readTime',
-      type: 'string',
-      title: 'Read Time (e.g. "5 min read")',
-      group: 'content',
-    }),
-    defineField({
-      name: 'excerpt',
-      type: 'text',
-      rows: 4,
-      group: 'content',
-    }),
-    defineField({
       name: 'body',
+      title: 'Body Content',
       type: 'blockContent',
       group: 'content',
     }),
@@ -92,12 +108,8 @@ export const postType = defineType({
   preview: {
     select: {
       title: 'title',
-      author: 'author.name',
+      subtitle: 'client',
       media: 'mainImage',
-    },
-    prepare(selection) {
-      const {author} = selection
-      return {...selection, subtitle: author && `by ${author}`}
     },
   },
 })

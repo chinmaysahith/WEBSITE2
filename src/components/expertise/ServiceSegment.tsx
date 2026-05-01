@@ -44,7 +44,7 @@ export default function ServiceSegment({ segment, index }: ServiceSegmentProps) 
 
   return (
     <section
-      className={`relative overflow-hidden py-20 md:py-28 lg:py-40 ${isEven ? "gradient-section-warm" : "gradient-section-cool"} gradient-noise`}
+      className={`relative overflow-hidden py-20 md:py-28 lg:py-40`}
       ref={containerRef}
     >
       {/* Background numeral — decorative, clipped by overflow-hidden */}

@@ -80,12 +80,33 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "APSLOCK",
+    "url": siteMeta.url,
+    "logo": siteMeta.ogImage.src,
+    "description": siteMeta.description,
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": contactInfo.phone,
+      "contactType": "customer service",
+      "email": contactInfo.email,
+      "areaServed": "Worldwide"
+    },
+    "sameAs": contactInfo.social.map((s) => s.url)
+  };
+
   return (
     <html
       lang="en"
       className={`${bilbesto.variable} ${fraunces.variable} ${khand.variable} ${hind.variable} h-full`}
     >
       <body className="min-h-full flex flex-col antialiased overflow-x-hidden">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
         <Navbar links={navLinks} siteName="APSLOCK" />
         <main className="flex-1">{children}</main>
         <Footer links={navLinks} contactInfo={contactInfo} siteName="APSLOCK" />

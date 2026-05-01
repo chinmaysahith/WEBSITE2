@@ -23,7 +23,7 @@ const aestheticPics = [
 
 export default function AnimatedCapabilities({ items }: AnimatedCapabilitiesProps) {
   return (
-    <section className="py-16 lg:py-24 gradient-section-warm relative gradient-noise overflow-hidden">
+    <section className="py-16 lg:py-24 relative overflow-hidden">
       <div className="w-full max-w-[1600px] mx-auto px-6 md:px-12 lg:px-24">
         <FadeIn>
           <div className="mb-10 lg:mb-16">

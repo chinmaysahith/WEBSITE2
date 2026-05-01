@@ -46,13 +46,18 @@ function DesktopReel() {
             const rawDist = (p - peak) / halfSlice;
             const absDist = Math.min(Math.abs(rawDist), 1.5);
 
+            const isLast = i === cards.length - 1;
+            
+            // Prevent the last item from drifting upwards to close the gap to the next section
+            const effectiveRawDistY = (isLast && rawDist > 0) ? 0 : rawDist;
+            
             const scale = 1 - ease(Math.min(absDist, 1)) * 0.3;
-            const y = -rawDist * 35;
+            const y = -effectiveRawDistY * 35;
             const rotate = rawDist * 2;
 
             const fadeStart = 0.6;
             const opacity =
-              absDist < fadeStart
+              absDist < fadeStart || (isLast && rawDist > 0)
                 ? 1
                 : Math.max(0, 1 - (absDist - fadeStart) / (1.2 - fadeStart));
 
@@ -83,7 +88,7 @@ function DesktopReel() {
       ref={wrapRef}
       aria-label="Our achievements"
       className="relative"
-      style={{ height: `${featuredCases.length * 150}vh` }}
+      style={{ height: `${featuredCases.length * 90}vh` }}
     >
       {/* Section gradient bg */}
       <div

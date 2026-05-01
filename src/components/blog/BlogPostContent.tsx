@@ -267,6 +267,16 @@ const portableTextComponents: PortableTextComponents = {
     strong: ({ children }) => (
       <strong className="text-text font-bold">{children}</strong>
     ),
+    internalLink: ({ value, children }: any) => {
+      if (!value?.reference?.slug?.current) return <span className="text-accent">{children}</span>;
+      const type = value.reference._type;
+      const href = `/${type === 'caseStudy' ? 'case-studies' : 'blogs'}/${value.reference.slug.current}`;
+      return (
+        <Link href={href} className="text-accent hover:text-accent-hover transition-colors duration-200 underline decoration-accent/30 underline-offset-4">
+          {children}
+        </Link>
+      );
+    },
   },
 };
 
@@ -304,7 +314,7 @@ export default function BlogPostContent({
         {/* Hero Section */}
         <header className="relative pt-32 pb-20 md:pt-40 md:pb-28 lg:pt-48 lg:pb-36 overflow-hidden">
           <div className="absolute inset-0 gradient-hero" />
-          <div className="absolute inset-0 gradient-noise" />
+          <div className="absolute inset-0" />
 
           {/* Decorative geometry */}
           <div className="absolute top-20 right-[8%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-accent/[0.03] to-transparent blur-3xl" />
@@ -446,7 +456,7 @@ export default function BlogPostContent({
 
         {/* Related Posts */}
         {relatedPosts.length > 0 && (
-          <section className="py-20 md:py-28 gradient-section-warm relative gradient-noise overflow-hidden">
+          <section className="py-20 md:py-28 relative overflow-hidden">
             <div className="container-wide">
               <FadeIn>
                 <p className="text-eyebrow mb-4">Keep Reading</p>
