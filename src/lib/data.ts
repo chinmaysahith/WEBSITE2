@@ -64,9 +64,9 @@ export interface HeroContent {
 }
 
 export const heroContent: HeroContent = {
-  headline: "We build digital experiences that matter",
+  headline: "Built to stand out. Engineered to perform.",
   subline:
-    "APSLOCK is a strategic design and technology studio. We partner with ambitious brands to create web experiences, campaigns, and content that drive real growth.",
+    "APSLOCK partners with ambitious brands to design and build digital experiences, platforms, and campaigns that drive measurable growth.",
   primaryCta: { label: "View our work", href: "/case-studies" },
   secondaryCta: { label: "Let's talk", href: "/contact" },
   image: {
@@ -151,36 +151,43 @@ export interface Capability {
 
 export const capabilities: Capability[] = [
   {
-    title: "Web Experiences That Convert",
+    title: "Digital Platforms",
     description:
-      "From marketing sites to complex platforms, we design and develop web experiences that captivate visitors and convert them into customers.",
+      "We design and develop scalable web experiences that form the foundation of your digital presence—built for performance, flexibility, and growth.",
     icon: "Monitor",
   },
   {
-    title: "Search Visibility & Growth",
+    title: "Product & App Experiences",
     description:
-      "Data-driven SEO and content strategies that boost organic visibility, drive qualified traffic, and build long-term authority.",
+      "From concept to launch, we create intuitive applications that solve real problems and deliver seamless user experiences across devices.",
+    icon: "Layers",
+  },
+  {
+    title: "AI-Driven Solutions",
+    description:
+      "We integrate intelligent systems that automate workflows, enhance decision-making, and unlock new possibilities for modern businesses.",
+    icon: "Cpu",
+  },
+  {
+    title: "Growth Marketing",
+    description:
+      "We craft data-driven campaigns that connect brands with the right audience—turning visibility into engagement and engagement into results.",
+    icon: "TrendingUp",
+  },
+  {
+    title: "Search & Visibility",
+    description:
+      "We optimize digital presence to ensure your brand is discoverable, relevant, and consistently positioned where it matters most.",
     icon: "Search",
   },
   {
-    title: "Brand & Messaging That Sticks",
+    title: "Brand Identity & Design",
     description:
-      "We craft brand identities, voice guidelines, and visual systems that differentiate you in crowded markets and resonate with your audience.",
+      "We create distinctive visual identities that communicate clearly, resonate deeply, and establish a strong, memorable brand presence.",
     icon: "Palette",
   },
-  {
-    title: "Campaigns That Drive Demand",
-    description:
-      "Integrated marketing campaigns across paid, organic, and social channels that generate awareness, leads, and measurable pipeline.",
-    icon: "Megaphone",
-  },
-  {
-    title: "Content That Builds Authority",
-    description:
-      "Editorial strategy and production — from thought leadership to multimedia storytelling — that positions you as the go-to voice in your space.",
-    icon: "PenTool",
-  },
 ];
+
 
 // ── Case Studies ─────────────────────────────────────────
 
@@ -743,25 +750,25 @@ export const values: Value[] = [
   {
     title: "Clarity Over Complexity",
     description:
-      "We distill complexity into clear, actionable strategies. Every deliverable should be understood by the CEO and the intern alike.",
+      "We turn complex ideas into clear, actionable direction. Every decision, every deliverable—built to be understood and aligned across teams.",
     icon: "Focus",
   },
   {
     title: "Craft Matters",
     description:
-      "Details are not details — they are the design. We sweat the pixels, the words, and the performance budgets because quality compounds.",
+      "Details aren't optional—they define the outcome. From pixels to performance, we obsess over the small things because they compound into excellence.",
     icon: "Gem",
   },
   {
     title: "Outcomes, Not Outputs",
     description:
-      "Beautiful work that doesn't move metrics is art, not strategy. We measure success by business impact, not deliverable volume.",
+      "Great design means nothing without impact. We measure success by results—growth, engagement, and real business movement.",
     icon: "TrendingUp",
   },
   {
     title: "Partnership, Not Vendor",
     description:
-      "We embed with your team, learn your business, and operate as strategic partners invested in your long-term success.",
+      "We don't work for you—we work with you. Embedding deeply, understanding your business, and building long-term value together.",
     icon: "Handshake",
   },
 ];
@@ -780,11 +787,11 @@ export const workProcess: WorkProcessItem[] = [
     phase: "Phase 1",
     title: "Understand",
     description:
-      "Stakeholder interviews, competitive analysis, and audience research to build a foundation of insight.",
+      "We start by listening, learning, and uncovering insights that shape everything that follows.",
     deliverables: [
-      "Discovery Workshop",
-      "Competitive Audit",
-      "Audience Personas",
+      "Stakeholder Interviews",
+      "Competitive Analysis",
+      "Audience Research",
       "Strategic Brief",
     ],
   },
@@ -792,19 +799,19 @@ export const workProcess: WorkProcessItem[] = [
     phase: "Phase 2",
     title: "Define",
     description:
-      "Strategy and creative direction that align your goals, audience needs, and market opportunity.",
+      "We translate insights into a clear strategy and creative direction aligned with your goals.",
     deliverables: [
       "Brand Strategy",
       "Content Architecture",
       "Creative Direction",
-      "Technical Spec",
+      "Technical Planning",
     ],
   },
   {
     phase: "Phase 3",
     title: "Create",
     description:
-      "Design, development, and content production — brought to life through iterative collaboration.",
+      "Ideas become reality through thoughtful design, development, and collaboration.",
     deliverables: [
       "UI/UX Design",
       "Development Sprints",
@@ -814,12 +821,12 @@ export const workProcess: WorkProcessItem[] = [
   },
   {
     phase: "Phase 4",
-    title: "Launch & Learn",
+    title: "Launch & Evolve",
     description:
-      "Ship, measure, and optimize. We don't disappear after launch — we help you grow.",
+      "We launch with intention—and continue refining for performance and growth.",
     deliverables: [
       "Launch Support",
-      "Analytics Setup",
+      "Analytics & Tracking",
       "Performance Review",
       "Growth Roadmap",
     ],

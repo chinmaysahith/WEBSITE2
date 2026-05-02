@@ -76,48 +76,85 @@
 }
 
 /* ── Blob gradient animations ─────────────────────────── */
-@keyframes blob-a {
-  0%, 100% { transform: translate(0%, 0%) scale(1); }
-  25%       { transform: translate(5%, -8%) scale(1.06); }
-  55%       { transform: translate(-4%, 6%) scale(0.95); }
-  80%       { transform: translate(7%, 4%) scale(1.03); }
+
+/*
+  Corner-anchored blob system.
+  Each blob breathes (scale) from its corner anchor point
+  AND drifts back-and-forth into the page — natural, organic feel.
+  transform-origin is set to the corner it comes from.
+*/
+
+/* ── ENTRANCE: blob emerges from deep in the corner ────── */
+@keyframes blob-entrance-tr {
+  0%   { opacity: 0; transform: scale(0.05) translate(0%, 0%); }
+  60%  { opacity: 1; }
+  100% { opacity: 1; transform: scale(1)   translate(0%, 0%); }
 }
-@keyframes blob-b {
-  0%, 100% { transform: translate(0%, 0%) scale(1); }
-  30%       { transform: translate(-7%, 5%) scale(0.93); }
-  60%       { transform: translate(5%, -7%) scale(1.05); }
-  85%       { transform: translate(-3%, -4%) scale(0.98); }
-}
-@keyframes blob-c {
-  0%, 100% { transform: translate(0%, 0%) scale(1); }
-  35%       { transform: translate(6%, 7%) scale(0.91); }
-  65%       { transform: translate(-6%, -4%) scale(1.07); }
-  90%       { transform: translate(3%, 5%) scale(0.96); }
+@keyframes blob-entrance-bl {
+  0%   { opacity: 0; transform: scale(0.05) translate(0%, 0%); }
+  60%  { opacity: 1; }
+  100% { opacity: 1; transform: scale(1)   translate(0%, 0%); }
 }
 
-@keyframes blob-entrance {
-  0% { 
-    opacity: 0; 
-    transform: scale(0.2) translate(10%, -10%); 
-  }
-  100% { 
-    opacity: 1; 
-    transform: scale(1) translate(0%, 0%); 
-  }
+/*
+  Primary blob — top-right corner.
+  Breathes: zooms out into the page then retreats back.
+  Also drifts slightly left/down on exhale.
+*/
+@keyframes blob-breathe-tr {
+  0%   { transform: scale(1)    translate(0%,    0%);    }
+  20%  { transform: scale(1.18) translate(-6%,   8%);    } /* exhale — push inward */
+  45%  { transform: scale(0.82) translate(-2%,   3%);    } /* inhale — retract */
+  65%  { transform: scale(1.22) translate(-9%,  12%);    } /* big exhale */
+  80%  { transform: scale(0.88) translate(-4%,   6%);    } /* inhale */
+  100% { transform: scale(1)    translate(0%,    0%);    } /* rest */
 }
 
-/* Slow-drift classes used by GrainBlobs component */
+/*
+  Secondary blob — bottom-left corner, offset timing.
+  Slightly smaller, slower breathing.
+*/
+@keyframes blob-breathe-bl {
+  0%   { transform: scale(1)    translate(0%,    0%);    }
+  25%  { transform: scale(1.15) translate(7%,   -6%);    } /* exhale — push inward */
+  50%  { transform: scale(0.80) translate(3%,   -2%);    } /* inhale */
+  70%  { transform: scale(1.20) translate(10%,  -9%);    } /* big exhale */
+  85%  { transform: scale(0.85) translate(5%,   -4%);    } /* inhale */
+  100% { transform: scale(1)    translate(0%,    0%);    } /* rest */
+}
+
+/*
+  Tertiary accent blob — mid-right, drifts up/down lazily.
+*/
+@keyframes blob-drift-accent {
+  0%   { transform: scale(1)    translateY(0%);   }
+  30%  { transform: scale(1.08) translateY(-8%);  }
+  60%  { transform: scale(0.94) translateY(6%);   }
+  100% { transform: scale(1)    translateY(0%);   }
+}
+
+/* ── CSS classes consumed by GrainBlobs ─────────────────── */
+
+/* Main top-right blob */
 .blob-drift-a {
   transform-origin: top right;
-  animation: 
-    blob-entrance 2.5s cubic-bezier(0.16, 1, 0.3, 1) forwards,
-    blob-a 18s ease-in-out 2.5s infinite;
+  animation:
+    blob-entrance-tr 3s cubic-bezier(0.16, 1, 0.3, 1) both,
+    blob-breathe-tr 20s ease-in-out 3s infinite;
 }
+
+/* Secondary bottom-left blob */
 .blob-drift-b {
-  animation: blob-b 22s ease-in-out infinite;
+  transform-origin: bottom left;
+  animation:
+    blob-entrance-bl 3.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both,
+    blob-breathe-bl 26s ease-in-out 4.4s infinite;
 }
+
+/* Accent mid blob, no entrance delay */
 .blob-drift-c {
-  animation: blob-c 26s ease-in-out infinite;
+  transform-origin: center right;
+  animation: blob-drift-accent 18s ease-in-out 1s infinite;
 }
 
 /* ── Base Styles ──────────────────────────────────────── */

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import FadeIn from "@/components/shared/FadeIn";
+import { HighlightText } from "@/components/ui/HighlightText";
 import ValuesSection from "@/components/about/ValuesSection";
 import WorkProcess from "@/components/about/WorkProcess";
 import TeamSection from "@/components/about/TeamSection";
@@ -24,14 +25,17 @@ export default function AboutPage() {
         <div className="container-wide">
           <FadeIn>
             <p className="text-eyebrow text-accent mb-4">About Us</p>
-            <h1 className="text-hero text-text max-w-3xl">
-              A studio built on craft and conviction
+            <h1 className="text-hero text-text max-w-4xl">
+              <HighlightText text="A studio built on craft and conviction" highlight={["craft", "conviction"]} />
             </h1>
-            <p className="mt-6 text-lg md:text-xl text-text-muted max-w-2xl leading-relaxed">
-              APSLOCK started with a belief: the best digital work happens when
-              strategy, design, and engineering sit at the same table. We&apos;re a
-              small, senior team that partners deeply with the brands we believe in.
-            </p>
+            <div className="mt-6 text-lg md:text-xl text-text-muted max-w-3xl leading-relaxed space-y-4">
+              <p>
+                APSLOCK was founded on a simple belief — the most impactful digital work happens when strategy, design, and technology move as one.
+              </p>
+              <p>
+                We&apos;re a focused, senior-led studio that partners closely with ambitious brands. Not as an external vendor, but as an extension of your team — invested in building work that performs, scales, and lasts.
+              </p>
+            </div>
           </FadeIn>
         </div>
       </section>

@@ -6,6 +6,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import FadeIn from "@/components/shared/FadeIn";
+import { HighlightText } from "@/components/ui/HighlightText";
 import type { Value } from "@/lib/data";
 
 const iconMap: Record<string, LucideIcon> = {
@@ -25,8 +26,8 @@ export default function ValuesSection({ values }: ValuesSectionProps) {
       <div className="container-wide">
         <FadeIn>
           <p className="text-eyebrow mb-4">Our Values</p>
-          <h2 className="text-section-heading text-text max-w-xl mb-16">
-            What drives everything we do
+          <h2 className="text-section-heading text-text max-w-2xl mb-16">
+            <HighlightText text="What drives everything we do" highlight={["drives", "everything"]} />
           </h2>
         </FadeIn>
 

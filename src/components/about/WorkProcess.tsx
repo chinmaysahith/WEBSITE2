@@ -1,4 +1,5 @@
 import FadeIn from "@/components/shared/FadeIn";
+import { HighlightText } from "@/components/ui/HighlightText";
 import type { WorkProcessItem } from "@/lib/data";
 
 interface WorkProcessProps {
@@ -11,8 +12,8 @@ export default function WorkProcess({ process }: WorkProcessProps) {
       <div className="container-wide">
         <FadeIn>
           <p className="text-eyebrow mb-4">How We Work</p>
-          <h2 className="text-section-heading text-text max-w-xl mb-16">
-            A process built for partnership
+          <h2 className="text-section-heading text-text max-w-3xl mb-16">
+            <HighlightText text="A process designed for clarity, collaboration, and growth" highlight={["clarity,", "collaboration,", "growth"]} />
           </h2>
         </FadeIn>
 

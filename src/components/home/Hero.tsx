@@ -65,19 +65,16 @@ export default function Hero({ content }: HeroProps) {
           {/* Left — text (padded for readability) */}
           <div className="order-2 lg:order-1 px-6 md:px-12 lg:pl-16 xl:pl-24 lg:pr-8">
             <FadeIn>
-              <p className="text-eyebrow text-accent mb-6">APSLOCK</p>
-            </FadeIn>
-            <FadeIn delay={0.1}>
               <h1 className="text-hero text-text">
-                <HighlightText text={content.headline} highlight="build" />
+                <HighlightText text={content.headline} highlight={["stand out.", "perform."]} />
               </h1>
             </FadeIn>
-            <FadeIn delay={0.2}>
+            <FadeIn delay={0.1}>
               <p className="mt-6 text-lg md:text-xl text-text-muted leading-relaxed max-w-xl">
                 {content.subline}
               </p>
             </FadeIn>
-            <FadeIn delay={0.3}>
+            <FadeIn delay={0.2}>
               <div className="mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <Link
                   href={content.primaryCta.href}

@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <div className="relative overflow-clip" style={{ background: "var(--bg)" }}>
-      <GrainBlobs variant="amber" intensity={0.12} animate={true} />
+      <GrainBlobs variant="amber" intensity={0.20} animate={true} />
       
       <div className="relative z-10">
         <Hero content={heroContent} />

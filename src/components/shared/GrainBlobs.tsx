@@ -1,53 +1,52 @@
 "use client";
 
 /**
- * GrainBlobs — Premium soft gradient blobs with film grain texture.
+ * GrainBlobs — Corner-anchored breathing blobs with film grain texture.
  *
- * Fix notes:
- *  - Old warm/sand colours were nearly identical to #FAFAF7 bg → invisible.
- *  - Old SVG feComposite "in" operator produced no output on white fill.
- *  - New colours are noticeably different from background but still tasteful.
- *  - Grain now uses a tiled background-image SVG with multiply blend — reliable.
+ * Behaviour:
+ *  - Blob A (top-right)   : emerges from corner, breathes in/out, drifts inward on exhale
+ *  - Blob B (bottom-left) : same but from opposite corner, offset timing
+ *  - Blob C (accent)      : mid-right subtle drift, no corner entrance
+ *  - Film grain overlay   : tiled SVG noise for premium texture
  */
 
 interface GrainBlobsProps {
   variant?: "amber" | "sage" | "blush" | "slate";
-  intensity?: number; // 0–1, grain darkness (default 0.12)
+  intensity?: number;   // 0–1, grain opacity (default 0.18)
   animate?: boolean;
   className?: string;
 }
 
-// Colors are picked to be VISIBLY different from #FAFAF7 cream
-// while staying tonal and premium — NOT neon, NOT flat
-const PALETTE: Record<string, { core: string; a: string; b: string }> = {
-  // Warm amber-gold
+/**
+ * Colours are intentionally punchy enough to read on the cream #FAFAF7 background.
+ * core  = the dense center of the blob (strongest)
+ * mid   = the mid-ring
+ * edge  = feathered outer glow
+ */
+const PALETTE: Record<string, { core: string; mid: string; edge: string }> = {
   amber: {
-    core: "rgba(215, 120, 40, 0.45)",  // Deep rich orange core
-    a: "rgba(195, 155, 80, 0.35)",     // Mid amber
-    b: "rgba(225, 190, 120, 0.15)",    // Pale gold fade
+    core: "rgba(210, 100, 20, 0.60)",   // Deep burnt orange
+    mid:  "rgba(200, 150, 60, 0.35)",   // Amber ring
+    edge: "rgba(235, 200, 130, 0.14)",  // Pale gold haze
   },
-  // Muted sage-green
   sage: {
-    core: "rgba(60, 130, 90, 0.40)",   // Deep forest core
-    a: "rgba(90, 150, 110, 0.35)",   
-    b: "rgba(130, 180, 145, 0.15)",  
+    core: "rgba(40, 115, 75, 0.55)",
+    mid:  "rgba(75, 140, 100, 0.32)",
+    edge: "rgba(120, 175, 140, 0.14)",
   },
-  // Dusty blush-rose
   blush: {
-    core: "rgba(200, 75, 80, 0.38)",   // Richer, deeper red/rose core
-    a: "rgba(190, 115, 110, 0.30)",    // Mid dusty rose
-    b: "rgba(225, 165, 155, 0.15)",    // Pale pink fade
+    core: "rgba(195, 60, 70, 0.55)",
+    mid:  "rgba(185, 105, 100, 0.32)",
+    edge: "rgba(230, 165, 155, 0.14)",
   },
-  // Cool slate-blue
   slate: {
-    core: "rgba(60, 90, 150, 0.40)",   // Deep slate core
-    a: "rgba(90, 120, 175, 0.35)",   
-    b: "rgba(140, 168, 215, 0.15)",  
+    core: "rgba(45, 75, 145, 0.58)",
+    mid:  "rgba(80, 110, 170, 0.33)",
+    edge: "rgba(135, 165, 215, 0.14)",
   },
 };
 
-// Tiled grain SVG as a CSS background — uses multiply so it darkens what's under it
-// Encodes to a URL-safe data URI without escaping issues
+// Tiled grain SVG — overlay blend for premium texture
 const GRAIN_BG = [
   "url(\"data:image/svg+xml,",
   "<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'>",
@@ -61,7 +60,7 @@ const GRAIN_BG = [
 
 export default function GrainBlobs({
   variant = "amber",
-  intensity = 0.22, // Increased default intensity for much more visible grain
+  intensity = 0.18,
   animate = true,
   className = "",
 }: GrainBlobsProps) {
@@ -79,36 +78,87 @@ export default function GrainBlobs({
         zIndex: 0,
       }}
     >
-      {/* ── Blob A — Top Right Corner Only ──────────────────────── */}
+      {/* ── Blob A — Top-right corner ──────────────────────────────
+          Breathes outward (scale up) into the page, then retreats.
+          transform-origin: top right → scale anchors to the corner.
+          Large size so when it scales up you really feel it cross the page.
+      ─────────────────────────────────────────────────────────── */}
       <div
         className={animate ? "blob-drift-a" : undefined}
         style={{
           position: "absolute",
-          top: "-10%",
-          right: "-10%",
-          width: "80vw",
-          height: "120vh",
-          maxWidth: 1400,
+          top: "-20%",
+          right: "-20%",
+          width: "90vw",
+          height: "130vh",
+          maxWidth: 1500,
           background: `
-            radial-gradient(ellipse at 95% 5%, ${pal.core} 0%, transparent 45%),
-            radial-gradient(ellipse at 85% 15%, ${pal.a} 5%, transparent 65%),
-            radial-gradient(ellipse at 70% 30%, ${pal.b} 15%, transparent 90%)
+            radial-gradient(ellipse at 95% 5%,  ${pal.core} 0%, transparent 38%),
+            radial-gradient(ellipse at 82% 18%, ${pal.mid}  5%, transparent 55%),
+            radial-gradient(ellipse at 65% 35%, ${pal.edge} 15%, transparent 80%)
           `,
           filter: "blur(80px)",
+          willChange: "transform, opacity",
+        }}
+      />
+
+      {/* ── Blob B — Bottom-left corner ─────────────────────────────
+          Mirror of Blob A, opposite corner.
+          transform-origin: bottom left → scale from that corner.
+          Delayed entrance so it unfolds after the primary blob.
+      ─────────────────────────────────────────────────────────── */}
+      <div
+        className={animate ? "blob-drift-b" : undefined}
+        style={{
+          position: "absolute",
+          bottom: "-20%",
+          left: "-20%",
+          width: "80vw",
+          height: "110vh",
+          maxWidth: 1300,
+          background: `
+            radial-gradient(ellipse at 5% 95%,  ${pal.core} 0%, transparent 40%),
+            radial-gradient(ellipse at 18% 80%, ${pal.mid}  8%, transparent 58%),
+            radial-gradient(ellipse at 35% 62%, ${pal.edge} 18%, transparent 85%)
+          `,
+          filter: "blur(90px)",
+          willChange: "transform, opacity",
+        }}
+      />
+
+      {/* ── Blob C — Accent, mid-right ──────────────────────────────
+          Soft secondary presence with lazy vertical drift.
+          No corner entrance — just ambient breathing.
+      ─────────────────────────────────────────────────────────── */}
+      <div
+        className={animate ? "blob-drift-c" : undefined}
+        style={{
+          position: "absolute",
+          top: "25%",
+          right: "-8%",
+          width: "45vw",
+          height: "55vh",
+          maxWidth: 750,
+          background: `
+            radial-gradient(ellipse at 90% 50%, ${pal.mid}  0%, transparent 52%),
+            radial-gradient(ellipse at 75% 62%, ${pal.edge} 10%, transparent 78%)
+          `,
+          filter: "blur(65px)",
+          opacity: 0.8,
           willChange: "transform",
         }}
       />
 
-      {/* ── Film grain overlay — tiled SVG noise, enhanced blend ── */}
+      {/* ── Film grain overlay ───────────────────────────────────── */}
       <div
         style={{
           position: "absolute",
           inset: 0,
           backgroundImage: GRAIN_BG,
           backgroundRepeat: "repeat",
-          backgroundSize: "150px 150px", // slightly smaller tile for finer grain
+          backgroundSize: "150px 150px",
           opacity: intensity,
-          mixBlendMode: "overlay", // Overlay creates both highlights and shadows for high-clarity grain
+          mixBlendMode: "overlay",
           pointerEvents: "none",
         }}
       />
