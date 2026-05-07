@@ -1,8 +1,8 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
-import { clipPathVariants } from "@/components/ui/animated-slideshow"
 import type { Capability } from "@/lib/data"
 import FadeIn from "@/components/shared/FadeIn"
 
@@ -10,167 +10,413 @@ interface AnimatedCapabilitiesProps {
   items: Capability[]
 }
 
-// One focused image per capability — rich, editorial photography
 const capabilityImages = [
-  "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&q=80&w=1200", // digital/laptop
-  "https://images.unsplash.com/photo-1555774698-0b77e0d5fac6?auto=format&fit=crop&q=80&w=1200", // mobile app
-  "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&q=80&w=1200", // AI/circuit
-  "https://images.unsplash.com/photo-1533750349088-cd871a92f312?auto=format&fit=crop&q=80&w=1200", // growth/marketing
-  "https://images.unsplash.com/photo-1562577309-4932fdd64cd1?auto=format&fit=crop&q=80&w=1200", // search/seo
-  "https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&q=80&w=1200", // brand/design
+  "/capabilities/digital-platforms.png",
+  "/capabilities/product-app.png",
+  "/capabilities/ai-solutions.png",
+  "/capabilities/growth-marketing.png",
+  "/capabilities/search-visibility.png",
+  "/capabilities/brand-identity.png",
+]
+
+const timelines = [
+  "2 – 4 weeks",
+  "4 – 8 weeks",
+  "3 – 6 weeks",
+  "2 – 4 weeks",
+  "1 – 3 weeks",
+  "2 – 5 weeks",
 ]
 
 function pad(n: number) {
-  return String(n + 1).padStart(2, "0")
+  return String(n + 1)
 }
 
-// Self-contained image slide with clip-path animation — no external context needed
-function CapabilityImage({
-  imageUrl,
-  alt,
-  isActive,
-}: {
-  imageUrl: string
-  alt: string
-  isActive: boolean
-}) {
-  return (
-    <motion.img
-      src={imageUrl}
-      alt={alt}
-      className="absolute inset-0 w-full h-full object-cover"
-      variants={clipPathVariants}
-      animate={isActive ? "visible" : "hidden"}
-      transition={{ ease: [0.33, 1, 0.68, 1], duration: 0.75 }}
-    />
-  )
+// ─────────────────────────────────────────────────────────
+// STAGE TRANSITION CONFIG
+// Current card: y 0% → -100% (exits UP)
+// Next card:    y 100% → 0%  (enters from BOTTOM)
+// Both animate simultaneously via AnimatePresence mode="sync"
+// ─────────────────────────────────────────────────────────
+const CARD_H = 460
+const STAGE_TRANSITION = {
+  duration: 0.85,
+  ease: [0.4, 0, 0.2, 1],
+} as const
+
+const cardVariants = {
+  initial: (direction: number) => ({
+    y: direction === 1 ? "100%" : "-100%",
+  }),
+  animate: {
+    y: "0%",
+  },
+  exit: (direction: number) => ({
+    y: direction === 1 ? "-100%" : "100%",
+  }),
 }
+
+const imageVariants = {
+  initial: (direction: number) => ({
+    y: direction === 1 ? "-100%" : "100%",
+  }),
+  animate: {
+    y: "0%",
+  },
+  exit: (direction: number) => ({
+    y: direction === 1 ? "100%" : "-100%",
+  }),
+}
+
+// ─────────────────────────────────────────────────────────
 
 export default function AnimatedCapabilities({ items }: AnimatedCapabilitiesProps) {
   const [activeIndex, setActiveIndex] = React.useState(0)
+  const [direction, setDirection] = React.useState(1)
+  const hoverTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+
+  React.useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current)
+    }
+  }, [])
+
+  function handleSelect(index: number) {
+    if (index === activeIndex) return
+    setDirection(index > activeIndex ? 1 : -1)
+    setActiveIndex(index)
+  }
+
+  function onHover(index: number) {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current)
+    hoverTimeoutRef.current = setTimeout(() => {
+      handleSelect(index)
+    }, 120) // 120ms debounce prevents rapid-fire glitches on fast sweeping
+  }
+
+  function onClick(index: number) {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current)
+    handleSelect(index)
+  }
 
   return (
-    <section className="py-20 lg:py-32 relative overflow-hidden">
-      <div className="w-full max-w-[1600px] mx-auto px-6 md:px-12 lg:px-24">
-
-        {/* ── Section header ─────────────────────────────────── */}
+    <section
+      className="py-16 lg:py-20 relative overflow-hidden"
+      style={{ background: "var(--bg)" }}
+    >
+      {/* ── Header ────────────────────────────────────────── */}
+      <div className="px-6 md:px-10 lg:px-16 mb-12 lg:mb-16">
         <FadeIn>
-          <div className="mb-14 lg:mb-20 max-w-2xl">
-            <h2 className="text-section-heading text-text mb-5">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+            <h2 className="text-section-heading text-text max-w-xl">
               Building Blocks of Digital Growth
             </h2>
-            <p className="text-lg text-text-muted leading-relaxed">
-              The core capabilities we bring together to design, build, and scale
-              high‑performing digital experiences.
+            <p className="text-base text-text-muted leading-relaxed max-w-sm lg:text-right">
+              The core capabilities we bring together to design, build,
+              and scale high‑performing digital experiences.
             </p>
           </div>
         </FadeIn>
+      </div>
 
-        {/* ── Mobile: stacked list ─────────────────────────── */}
-        <div className="flex flex-col divide-y divide-border lg:hidden">
-          {items.map((item, index) => (
-            <FadeIn key={item.title} delay={index * 0.05}>
-              <div className="py-6">
-                <div className="flex items-start gap-4">
-                  <span className="font-mono text-xs text-text-muted pt-[3px] shrink-0 w-6">
-                    {pad(index)}
-                  </span>
-                  <div>
-                    <p className="font-display font-semibold text-base uppercase tracking-tight text-text leading-snug mb-2">
-                      {item.title}
-                    </p>
-                    <p className="text-sm text-text-muted leading-relaxed">
-                      {item.description}
-                    </p>
-                  </div>
-                </div>
+      {/* ── Mobile ────────────────────────────────────────── */}
+      <div className="px-6 md:px-10 flex flex-col gap-5 lg:hidden">
+        {items.map((item, index) => (
+          <FadeIn key={item.title} delay={index * 0.05}>
+            <div className="flex gap-4">
+              <span
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "0.7rem",
+                  color: "var(--border)",
+                  fontWeight: 300,
+                  paddingTop: 3,
+                  flexShrink: 0,
+                }}
+              >
+                {pad(index)}.
+              </span>
+              <div>
+                <p className="font-display font-bold text-sm uppercase tracking-tight mb-1 text-text">
+                  {item.title}
+                </p>
+                <p className="text-sm leading-relaxed text-text-muted">
+                  {item.description}
+                </p>
               </div>
-            </FadeIn>
-          ))}
-        </div>
-
-        {/* ── Desktop: accordion + sticky image ───────────── */}
-        <div className="hidden lg:grid grid-cols-[1fr_420px] xl:grid-cols-[1fr_500px] gap-16 items-start">
-
-          {/* Left: accordion rows */}
-          <div className="flex flex-col divide-y divide-border/60">
-            {items.map((item, index) => {
-              const isActive = activeIndex === index
-              return (
-                <FadeIn key={item.title} delay={index * 0.07}>
-                  <button
-                    type="button"
-                    className="w-full text-left group py-7 focus:outline-none"
-                    onMouseEnter={() => setActiveIndex(index)}
-                    onClick={() => setActiveIndex(index)}
-                    aria-expanded={isActive}
-                  >
-                    <div className="flex items-center justify-between gap-6">
-                      {/* Index + Title */}
-                      <div className="flex items-baseline gap-5 flex-1 min-w-0">
-                        <span
-                          className="font-mono text-xs shrink-0 transition-colors duration-300"
-                          style={{ color: isActive ? "var(--accent)" : "rgba(var(--text-muted-rgb, 120,113,108), 0.4)" }}
-                        >
-                          {pad(index)}
-                        </span>
-                        <span
-                          className="font-display font-medium text-2xl xl:text-3xl uppercase tracking-tight leading-tight transition-colors duration-300"
-                          style={{ color: isActive ? "var(--text)" : "rgba(var(--text-muted-rgb, 120,113,108), 0.45)" }}
-                        >
-                          {item.title}
-                        </span>
-                      </div>
-
-                      {/* + / × indicator */}
-                      <motion.span
-                        className="text-2xl leading-none shrink-0 transition-colors duration-300"
-                        style={{ color: isActive ? "var(--text)" : "rgba(var(--text-muted-rgb, 120,113,108), 0.3)" }}
-                        animate={{ rotate: isActive ? 45 : 0 }}
-                        transition={{ duration: 0.22, ease: "easeOut" }}
-                      >
-                        +
-                      </motion.span>
-                    </div>
-
-                    {/* Expandable description */}
-                    <AnimatePresence initial={false}>
-                      {isActive && (
-                        <motion.div
-                          key="desc"
-                          initial={{ height: 0, opacity: 0, y: -4 }}
-                          animate={{ height: "auto", opacity: 1, y: 0 }}
-                          exit={{ height: 0, opacity: 0, y: -4 }}
-                          transition={{ duration: 0.32, ease: [0.25, 0.46, 0.45, 0.94] }}
-                          className="overflow-hidden"
-                        >
-                          <p className="pt-3 pb-1 ml-[2.75rem] text-base text-text-muted leading-relaxed max-w-lg">
-                            {item.description}
-                          </p>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </button>
-                </FadeIn>
-              )
-            })}
-          </div>
-
-          {/* Right: sticky image panel */}
-          <FadeIn delay={0.18} className="sticky top-28 self-start">
-            <div className="relative rounded-3xl overflow-hidden border border-border shadow-2xl aspect-[4/5]">
-              {items.map((item, index) => (
-                <CapabilityImage
-                  key={item.title}
-                  imageUrl={capabilityImages[index % capabilityImages.length]}
-                  alt={item.title}
-                  isActive={activeIndex === index}
-                />
-              ))}
             </div>
           </FadeIn>
+        ))}
+      </div>
 
+      {/* ── Desktop: 3 columns, right bleeds to edge ──────── */}
+      {/*
+        Only left padding — no right padding — image bleeds to viewport.
+        Columns: 28% list | 35% stage viewport | 1fr image
+      */}
+      <div
+        className="hidden lg:grid px-6 md:px-10 lg:px-16"
+        style={{
+          gridTemplateColumns: "28% 35% 1fr",
+          columnGap: "2.5rem",
+          alignItems: "start",
+        }}
+      >
+
+        {/* ══════════════════════════════════════════════════
+            COLUMN 1 — Clickable service list
+            Dark card on active, plain text on inactive.
+            No dividers. Weight contrast: number light, label bold.
+        ══════════════════════════════════════════════════ */}
+        <div
+          className="flex flex-col"
+          style={{ height: "100%" }}
+        >
+          {items.map((item, index) => {
+            const isActive = activeIndex === index
+            return (
+              <button
+                key={item.title}
+                type="button"
+                className="w-full text-left focus:outline-none flex-1 flex flex-col justify-center"
+                style={{ transition: "all 0.2s ease" }}
+                onMouseEnter={() => onHover(index)}
+                onClick={() => onClick(index)}
+              >
+                {isActive ? (
+                  /* Active — dark lifted tile */
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.75rem",
+                      padding: "0.75rem 1rem",
+                      background: "var(--text)",
+                      borderRadius: 12,
+                      boxShadow:
+                        "0 6px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.07)",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: "0.9rem",
+                        color: "rgba(255,255,255,0.4)",
+                        fontWeight: 300,
+                        flexShrink: 0,
+                        width: "1.4rem",
+                      }}
+                    >
+                      {pad(index)}.
+                    </span>
+                    <span
+                      style={{
+                        fontFamily: "var(--font-display)",
+                        fontSize: "1.15rem",
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        letterSpacing: "-0.01em",
+                        color: "#ffffff",
+                        lineHeight: 1.3,
+                      }}
+                    >
+                      {item.title}
+                    </span>
+                  </div>
+                ) : (
+                  /* Inactive — plain row */
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.75rem",
+                      padding: "0.75rem 1rem",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontFamily: "var(--font-mono)",
+                        fontSize: "0.9rem",
+                        color: "var(--border)",
+                        fontWeight: 300,
+                        flexShrink: 0,
+                        width: "1.4rem",
+                      }}
+                    >
+                      {pad(index)}.
+                    </span>
+                    <span
+                      style={{
+                        fontFamily: "var(--font-display)",
+                        fontSize: "1.15rem",
+                        fontWeight: 500,
+                        textTransform: "uppercase",
+                        letterSpacing: "-0.01em",
+                        color: "var(--text-muted)",
+                        lineHeight: 1.3,
+                      }}
+                    >
+                      {item.title}
+                    </span>
+                  </div>
+                )}
+              </button>
+            )
+          })}
         </div>
+
+        {/* ══════════════════════════════════════════════════
+            COLUMN 2 — Stage viewport (CENTER)
+
+            Rules:
+            - Fixed height, overflow hidden
+            - Cards absolutely positioned inside
+            - ONLY 2 cards ever in DOM during transition
+              (AnimatePresence mode="sync"):
+                • Current exits:  y 0% → -100%
+                • Next enters:    y 100% → 0%
+            - At rest: exactly 1 card in DOM
+        ══════════════════════════════════════════════════ */}
+        <div
+          style={{
+            position: "relative",
+            height: CARD_H,
+            overflow: "hidden",
+            /* The static viewport has NO border or background now */
+          }}
+        >
+          <AnimatePresence custom={direction} initial={false}>
+            <motion.div
+              key={activeIndex}
+              custom={direction}
+              variants={cardVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={STAGE_TRANSITION}
+              style={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                padding: 32,
+                /* The moving card ITSELF has the border and background */
+                border: "1px solid var(--border)",
+                borderRadius: 24,
+                background: "var(--surface)",
+              }}
+            >
+              {/* Title & Description — floats at top */}
+              <div>
+                <h3
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontSize: "1.35rem",
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    letterSpacing: "-0.01em",
+                    color: "var(--text)",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  {items[activeIndex].title}
+                </h3>
+                <p
+                  style={{
+                    fontSize: "1.125rem",
+                    lineHeight: 1.75,
+                    color: "var(--text-muted)",
+                    maxWidth: 400,
+                  }}
+                >
+                  {items[activeIndex].description}
+                </p>
+              </div>
+
+              {/* Timeline — pinned to bottom with dashed separator */}
+              <div>
+                <div
+                  style={{
+                    borderTop: "1.5px dashed var(--border)",
+                    marginBottom: "1rem",
+                  }}
+                />
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <span style={{ fontSize: "0.875rem", color: "var(--text-muted)" }}>
+                    Timeline
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "0.875rem",
+                      color: "var(--text-muted)",
+                      fontFamily: "var(--font-mono)",
+                    }}
+                  >
+                    {timelines[activeIndex % timelines.length]}
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* ══════════════════════════════════════════════════
+            COLUMN 3 — Image stage viewport
+            The moving card itself has the rounded corners.
+        ══════════════════════════════════════════════════ */}
+        <div
+          style={{
+            position: "relative",
+            height: CARD_H,
+            overflow: "hidden",
+            /* NO border radius here — the moving card has it */
+          }}
+        >
+          <AnimatePresence custom={direction} initial={false}>
+            <motion.div
+              key={activeIndex}
+              custom={direction}
+              variants={imageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.85, ease: [0.4, 0, 0.2, 1] }}
+              style={{
+                position: "absolute",
+                inset: 0,
+                borderRadius: 24,
+                overflow: "hidden",
+              }}
+            >
+              <Image
+                src={capabilityImages[activeIndex % capabilityImages.length]}
+                alt={items[activeIndex].title}
+                fill
+                sizes="(max-width: 1280px) 35vw, 500px"
+                className="object-cover"
+                priority={activeIndex === 0}
+              />
+              
+              {/* Bottom gradient overlay — moves WITH the image */}
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background: "linear-gradient(to top, rgba(0,0,0,0.3) 0%, transparent 45%)",
+                  pointerEvents: "none",
+                }}
+              />
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
       </div>
     </section>
   )

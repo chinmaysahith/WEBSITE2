@@ -25,7 +25,7 @@ export default function BigCTA() {
   const marqueeARef = useRef<HTMLDivElement>(null);
   const marqueeBRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const btnRef = useRef<HTMLButtonElement>(null);
+  const btnRef = useRef<HTMLAnchorElement>(null);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -95,22 +95,21 @@ export default function BigCTA() {
             </span>
           </h2>
 
-          <Link href="/contact">
-        <button
+          <Link
             ref={btnRef}
-            className="opacity-0 flex items-center gap-2 px-10 py-4 rounded-full font-semibold text-sm cursor-pointer"
+            href="/contact"
+            className="opacity-0 inline-flex items-center gap-2 px-10 py-4 rounded-full font-semibold text-sm"
             style={{ background: "#FFFFFF", color: "#080808" }}
             onMouseEnter={(e) =>
-            gsap.to(e.currentTarget, { scale: 1.06, duration: 0.3, ease: "power2.out" })
+              gsap.to(e.currentTarget, { scale: 1.06, duration: 0.3, ease: "power2.out" })
             }
             onMouseLeave={(e) =>
-            gsap.to(e.currentTarget, { scale: 1, duration: 0.3, ease: "power2.out" })
+              gsap.to(e.currentTarget, { scale: 1, duration: 0.3, ease: "power2.out" })
             }
-        >
+          >
             <Sparkles size={15} />
             Let&apos;s Connect
-        </button>
-        </Link>
+          </Link>
         </div>
 
         {/* MARQUEE STRIP */}

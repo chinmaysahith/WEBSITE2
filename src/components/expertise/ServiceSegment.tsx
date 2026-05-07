@@ -12,10 +12,12 @@ interface ServiceSegmentProps {
 }
 
 const segmentImages = [
-  "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&q=80&w=1000",
-  "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1000",
-  "https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&q=80&w=1000",
-  "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=1000",
+  "/expertise/digital-platforms-v2.png",
+  "/expertise/product-app-v2.png",
+  "/expertise/ai-solutions-v2.png",
+  "/expertise/growth-marketing-v2.png",
+  "/expertise/search-visibility-v2.png",
+  "/capabilities/brand-identity.png", // Uses the portrait one from home page (full frame)
 ];
 
 export default function ServiceSegment({ segment, index }: ServiceSegmentProps) {
@@ -27,6 +29,7 @@ export default function ServiceSegment({ segment, index }: ServiceSegmentProps) 
   const [enableParallax, setEnableParallax] = useState(false);
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     const mq = window.matchMedia("(min-width: 1024px) and (hover: hover)");
     setEnableParallax(mq.matches);
@@ -55,7 +58,7 @@ export default function ServiceSegment({ segment, index }: ServiceSegmentProps) 
         )}
       >
         <span className="text-[40vw] sm:text-[35vw] md:text-[30vw] font-display font-bold leading-none tracking-tighter">
-          0{index + 1}
+          {String(index + 1).padStart(2, "0")}
         </span>
       </div>
 
@@ -89,7 +92,7 @@ export default function ServiceSegment({ segment, index }: ServiceSegmentProps) 
           <div className="w-full lg:w-1/2 flex flex-col justify-center">
             <FadeIn>
               <div className="flex items-center gap-4 mb-5 lg:mb-6">
-                <span className="text-sm font-mono text-accent">0{index + 1}</span>
+                <span className="text-sm font-mono text-accent">{String(index + 1).padStart(2, "0")}</span>
                 <div className="h-px w-12 bg-accent/30" />
                 <p className="text-eyebrow text-accent !mb-0">{segment.label}</p>
               </div>

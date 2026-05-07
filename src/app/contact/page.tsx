@@ -7,9 +7,12 @@ import GrainBlobs from "@/components/shared/GrainBlobs";
 import { contactInfo } from "@/lib/data";
 
 export const metadata: Metadata = {
-  title: "Contact",
+  title: "Contact APSLOCK — Atlanta Digital Agency",
   description:
-    "Get in touch with APSLOCK. Let's discuss your next project — we'd love to hear about your challenges and goals.",
+    "Ready to grow? Contact APSLOCK, Atlanta's results-driven digital agency. Let's discuss your project — web design, brand strategy, growth marketing, and more.",
+  alternates: {
+    canonical: "https://apslock.com/contact",
+  },
 };
 
 export default function ContactPage() {

@@ -39,8 +39,9 @@ export default function ExpertiseHero() {
           </motion.h1>
           
           <motion.p variants={item} className="font-sans text-xl md:text-2xl text-text-muted max-w-2xl leading-relaxed">
-            We bring together strategy, design, engineering, and marketing under
-            one roof — so every touchpoint works together toward measurable growth.
+            Six disciplines. One studio. We bring together platforms, product, AI,
+            growth marketing, search, and brand — so every touchpoint works
+            together toward measurable growth.
           </motion.p>
         </motion.div>
       </div>

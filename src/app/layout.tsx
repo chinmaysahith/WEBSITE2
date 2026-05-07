@@ -14,7 +14,7 @@ const bilbesto = localFont({
 });
 
 const fraunces = Fraunces({
-  weight: ["300", "400", "500", "700", "900"],
+  weight: ["300", "400", "700"],
   style: ["normal", "italic"],
   subsets: ["latin"],
   variable: "--font-editorial",
@@ -22,14 +22,14 @@ const fraunces = Fraunces({
 });
 
 const khand = Khand({
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "600", "700"],
   subsets: ["latin"],
   variable: "--font-display",
   display: "swap",
 });
 
 const hind = Hind({
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "500", "600"],
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
@@ -72,6 +72,15 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  alternates: {
+    canonical: siteMeta.url,
   },
 };
 
@@ -82,19 +91,57 @@ export default function RootLayout({
 }>) {
   const organizationSchema = {
     "@context": "https://schema.org",
-    "@type": "Organization",
+    "@type": ["Organization", "LocalBusiness"],
     "name": "APSLOCK",
     "url": siteMeta.url,
-    "logo": siteMeta.ogImage.src,
+    "logo": `${siteMeta.url}${siteMeta.ogImage.src}`,
+    "image": `${siteMeta.url}${siteMeta.ogImage.src}`,
     "description": siteMeta.description,
+    "foundingDate": "2020",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Atlanta",
+      "addressRegion": "GA",
+      "addressCountry": "US"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": "33.7490",
+      "longitude": "-84.3880"
+    },
+    "areaServed": ["United States", "Worldwide"],
+    "knowsAbout": [
+      "Web Design",
+      "Brand Strategy",
+      "Growth Marketing",
+      "SEO",
+      "UI/UX Design",
+      "App Development",
+      "Content Strategy",
+      "Digital Marketing"
+    ],
     "contactPoint": {
       "@type": "ContactPoint",
       "telephone": contactInfo.phone,
       "contactType": "customer service",
       "email": contactInfo.email,
-      "areaServed": "Worldwide"
+      "areaServed": "Worldwide",
+      "availableLanguage": "English"
     },
     "sameAs": contactInfo.social.map((s) => s.url)
+  };
+
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "APSLOCK",
+    "url": siteMeta.url,
+    "description": siteMeta.description,
+    "publisher": {
+      "@type": "Organization",
+      "name": "APSLOCK",
+      "url": siteMeta.url
+    }
   };
 
   return (
@@ -106,6 +153,10 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
         <Navbar links={navLinks} siteName="APSLOCK" />
         <main className="flex-1">{children}</main>

@@ -26,11 +26,12 @@ export async function generateMetadata({
 }: BlogPostPageProps): Promise<Metadata> {
   const { slug } = await params;
   
-  let post;
-  if (process.env.NEXT_PUBLIC_SANITY_PROJECT_ID) {
-    post = await client.fetch(getPostBySlugQuery, { slug });
-  } else {
-    post = fallbackPosts.find((p) => p.slug === slug);
+  // Local posts take priority
+  let post: any = fallbackPosts.find((p) => p.slug === slug);
+  if (!post && process.env.NEXT_PUBLIC_SANITY_PROJECT_ID) {
+    try {
+      post = await client.fetch(getPostBySlugQuery, { slug });
+    } catch { /* silent */ }
   }
 
   if (!post) return {};
@@ -71,15 +72,21 @@ export async function generateMetadata({
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
   
-  let post;
-  let allPosts;
+  // Always check local posts first — guaranteed to exist
+  const localPost = fallbackPosts.find((p) => p.slug === slug);
   
-  if (process.env.NEXT_PUBLIC_SANITY_PROJECT_ID) {
-    post = await client.fetch(getPostBySlugQuery, { slug });
-    allPosts = await client.fetch(getPostsQuery);
-  } else {
-    post = fallbackPosts.find((p) => p.slug === slug);
-    allPosts = fallbackPosts;
+  let post: any = localPost;
+  let allPosts: any[] = fallbackPosts;
+  
+  // Only query Sanity for slugs not found locally
+  if (!localPost && process.env.NEXT_PUBLIC_SANITY_PROJECT_ID) {
+    try {
+      post = await client.fetch(getPostBySlugQuery, { slug });
+      const sanityAll = await client.fetch(getPostsQuery);
+      if (sanityAll?.length) allPosts = [...fallbackPosts, ...sanityAll];
+    } catch {
+      // silent — fallbackPosts still used
+    }
   }
 
   if (!post) {

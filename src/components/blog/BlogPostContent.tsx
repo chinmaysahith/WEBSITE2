@@ -10,256 +10,362 @@ import type { BlogPost } from "@/lib/data";
 import { formatDate } from "@/lib/utils";
 import { PortableText, type PortableTextComponents } from "@portabletext/react";
 
-// ── Markdown-to-JSX renderer (editorial style) ─────────────
-function parseMarkdownContent(content: string): ReactNode[] {
-  const sections = content.split(/^## /m);
-  const elements: ReactNode[] = [];
-
-  sections.forEach((section, sectionIndex) => {
-    if (sectionIndex === 0 && section.trim() === "") return;
-
-    let heading: string | null = null;
-    let body: string;
-
-    if (sectionIndex === 0) {
-      body = section;
-    } else {
-      const lines = section.split("\n");
-      heading = lines[0].trim();
-      body = lines.slice(1).join("\n");
-    }
-
-    const bodyElements = parseBody(body);
-
-    elements.push(
-      <section key={`section-${sectionIndex}`} className="blog-section">
-        {heading && (
-          <FadeIn>
-            <div className="mt-24 mb-12 flex items-center gap-6">
-              <div className="flex items-center gap-2">
-                <span className="block w-3 h-3 rounded-full border-2 border-accent/30" />
-                <span className="block w-8 h-[2px] bg-gradient-to-r from-accent/40 to-transparent" />
-              </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-text font-display tracking-tight uppercase leading-[1.1]">
-                {heading}
-              </h2>
-            </div>
-          </FadeIn>
-        )}
-        {bodyElements}
-      </section>
-    );
-  });
-
-  return elements;
+// ─── shared inline bold renderer ────────────────────────────
+function renderInline(text: string): ReactNode[] {
+  return text.split(/(\*\*.*?\*\*)/g).map((part, i) =>
+    part.startsWith("**") && part.endsWith("**") ? (
+      <strong key={i} className="text-text font-bold">
+        {part.slice(2, -2)}
+      </strong>
+    ) : (
+      <span key={i}>{part}</span>
+    )
+  );
 }
 
-function parseBody(body: string): ReactNode[] {
-  const elements: ReactNode[] = [];
-  const lines = body.split("\n");
-  let currentListItems: string[] = [];
-  let blockIndex = 0;
+// ─── parse raw markdown into section objects ────────────────
+interface Section { heading: string | null; paragraphs: string[]; bullets: string[][] }
 
-  const flushList = () => {
-    if (currentListItems.length > 0) {
-      elements.push(
-        <FadeIn key={`list-${blockIndex}`}>
-          <div className="my-8 py-6 px-8 md:px-10 rounded-2xl bg-[var(--gradient-cool)]/40 border border-border/40 backdrop-blur-sm">
-            <ul className="space-y-4">
-              {currentListItems.map((item, i) => (
-                <li
-                  key={i}
-                  className="flex items-start gap-4 text-text leading-relaxed group"
+function parseSections(content: string): Section[] {
+  const rawSections = content.split(/^## /m);
+  return rawSections
+    .filter((s) => s.trim())
+    .map((s, i) => {
+      const lines = i === 0 ? s.split("\n") : s.split("\n");
+      const heading = i === 0 ? null : lines[0].trim();
+      const body = i === 0 ? lines : lines.slice(1);
+      const paragraphs: string[] = [];
+      const bullets: string[][] = [];
+      let currentBullets: string[] = [];
+      body.forEach((line) => {
+        if (line.startsWith("- ")) {
+          currentBullets.push(line.slice(2).trim());
+        } else {
+          if (currentBullets.length) {
+            bullets.push([...currentBullets]);
+            paragraphs.push(`__BULLETS_${bullets.length - 1}__`);
+            currentBullets = [];
+          }
+          if (line.trim()) paragraphs.push(line.trim());
+        }
+      });
+      if (currentBullets.length) {
+        bullets.push([...currentBullets]);
+        paragraphs.push(`__BULLETS_${bullets.length - 1}__`);
+      }
+      return { heading, paragraphs, bullets };
+    });
+}
+
+// ══════════════════════════════════════════════════════════
+// VARIANT 1 — EDITORIAL  (Design blog)
+// Magazine-style: numbered sections, drop cap, bold callouts
+// ══════════════════════════════════════════════════════════
+function EditorialContent({ sections }: { sections: Section[] }) {
+  return (
+    <div className="max-w-[720px] mx-auto">
+      {sections.map((section, si) => (
+        <FadeIn key={si}>
+          <div className={si > 0 ? "mt-20" : ""}>
+            {section.heading && (
+              <div className="flex items-start gap-5 mb-8">
+                <span
+                  className="text-5xl font-black text-accent/20 font-display leading-none pt-1 select-none"
+                  style={{ fontVariantNumeric: "tabular-nums" }}
                 >
-                  <span className="mt-1.5 w-6 h-[2px] bg-accent/50 shrink-0 group-hover:w-8 group-hover:bg-accent transition-all duration-300" />
-                  <span className="text-[1.05rem] md:text-lg font-medium">
-                    {renderInline(item)}
-                  </span>
-                </li>
-              ))}
-            </ul>
+                  {String(si).padStart(2, "0")}
+                </span>
+                <h2 className="text-2xl md:text-3xl font-bold text-text font-display tracking-tight uppercase leading-tight pt-2">
+                  {section.heading}
+                </h2>
+              </div>
+            )}
+            {section.paragraphs.map((para, pi) => {
+              if (para.startsWith("__BULLETS_")) {
+                const idx = parseInt(para.replace("__BULLETS_", ""), 10);
+                return (
+                  <div key={pi} className="my-8 pl-6 border-l-2 border-accent/30 space-y-3">
+                    {section.bullets[idx].map((b, bi) => (
+                      <p key={bi} className="text-base md:text-lg text-text-muted leading-relaxed">
+                        <span className="text-accent font-bold mr-2">—</span>
+                        {renderInline(b)}
+                      </p>
+                    ))}
+                  </div>
+                );
+              }
+              const isBold = para.startsWith("**") && para.endsWith("**");
+              if (isBold) {
+                return (
+                  <div key={pi} className="my-10 py-6 px-8 bg-text text-bg rounded-2xl">
+                    <p className="text-xl md:text-2xl font-bold leading-snug font-display uppercase tracking-tight">
+                      {para.slice(2, -2)}
+                    </p>
+                  </div>
+                );
+              }
+              const isFirstPara = si === 0 && pi === 0;
+              return (
+                <p
+                  key={pi}
+                  className="text-[1.05rem] md:text-lg text-text-muted leading-[1.9] my-5"
+                  style={isFirstPara ? { textIndent: "0" } : undefined}
+                >
+                  {isFirstPara ? (
+                    <>
+                      <span className="float-left text-7xl font-black text-text leading-[0.8] mr-3 mt-1 font-display">
+                        {para[0]}
+                      </span>
+                      {renderInline(para.slice(1))}
+                    </>
+                  ) : (
+                    renderInline(para)
+                  )}
+                </p>
+              );
+            })}
           </div>
         </FadeIn>
-      );
-      currentListItems = [];
-      blockIndex++;
-    }
-  };
+      ))}
+    </div>
+  );
+}
 
-  let i = 0;
-  while (i < lines.length) {
-    const line = lines[i];
-
-    // List item
-    if (line.startsWith("- ")) {
-      currentListItems.push(line.slice(2).trim());
-      i++;
-      continue;
-    }
-
-    flushList();
-
-    // Empty line
-    if (line.trim() === "") {
-      i++;
-      continue;
-    }
-
-    // Collect consecutive non-empty, non-list lines
-    const paraLines: string[] = [];
-    while (
-      i < lines.length &&
-      lines[i].trim() !== "" &&
-      !lines[i].startsWith("- ") &&
-      !lines[i].startsWith("## ")
-    ) {
-      paraLines.push(lines[i]);
-      i++;
-    }
-
-    if (paraLines.length > 0) {
-      const isSingleBold =
-        paraLines.length === 1 &&
-        paraLines[0].startsWith("**") &&
-        paraLines[0].endsWith("**");
-
-      // Check if ALL lines are bold (e.g. a standalone bold block)
-      const isFullBoldBlock =
-        paraLines.length === 1 &&
-        paraLines[0].startsWith("**") &&
-        paraLines[0].endsWith("**");
-
-      const isShortBlock = paraLines.every((l) => l.length < 60);
-
-      if (isSingleBold || isFullBoldBlock) {
-        // Dramatic pull-quote / callout
-        const text = paraLines[0].slice(2, -2);
-        elements.push(
-          <FadeIn key={`callout-${blockIndex}`}>
-            <div className="my-12 md:my-16 relative">
-              {/* Accent glow */}
-              <div className="absolute -inset-4 bg-gradient-to-r from-accent/[0.04] via-transparent to-accent/[0.02] rounded-3xl blur-xl" />
-              <blockquote className="relative pl-8 md:pl-10 border-l-[3px] border-accent py-2">
-                <p className="text-2xl md:text-3xl lg:text-[2rem] font-bold text-text leading-[1.25] font-display uppercase tracking-tight">
-                  {text}
-                </p>
-              </blockquote>
-            </div>
-          </FadeIn>
-        );
-      } else if (isShortBlock && paraLines.length >= 2) {
-        // Manifesto-style verse block — punchy, staccato
-        elements.push(
-          <FadeIn key={`verse-${blockIndex}`}>
-            <div className="my-8 md:my-10 py-6 space-y-2 relative">
-              <div className="absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-border to-transparent" />
-              {paraLines.map((l, li) => (
-                <p
-                  key={li}
-                  className="text-lg md:text-xl text-text pl-6 leading-[1.6] font-medium"
-                >
-                  {renderInline(l)}
-                </p>
-              ))}
-            </div>
-          </FadeIn>
-        );
-      } else {
-        // Regular paragraph
-        elements.push(
-          <FadeIn key={`para-${blockIndex}`}>
-            <p className="text-[1.1rem] md:text-xl text-text-muted leading-[1.85] my-7 tracking-[-0.01em]">
-              {paraLines.map((l, li) => (
-                <span key={li}>
-                  {renderInline(l)}
-                  {li < paraLines.length - 1 ? " " : ""}
+// ══════════════════════════════════════════════════════════
+// VARIANT 2 — Q&A  (SEO / Marketing blog)
+// Bold questions as statements, punchy boxed answers
+// ══════════════════════════════════════════════════════════
+function QandAContent({ sections }: { sections: Section[] }) {
+  return (
+    <div className="max-w-[720px] mx-auto">
+      {sections.map((section, si) => (
+        <FadeIn key={si}>
+          <div className={si > 0 ? "mt-16" : ""}>
+            {section.heading && (
+              <div className="mb-6 mt-16">
+                <span className="text-xs font-mono text-accent uppercase tracking-widest mb-3 block">
+                  {si % 2 === 0 ? "The question" : "The reality"}
                 </span>
-              ))}
-            </p>
-          </FadeIn>
-        );
-      }
-      blockIndex++;
-    }
-
-    continue;
-  }
-
-  flushList();
-  return elements;
+                <h2 className="text-2xl md:text-3xl font-bold text-text font-display leading-tight">
+                  {section.heading}
+                </h2>
+                <div className="mt-4 h-px bg-gradient-to-r from-accent/40 to-transparent" />
+              </div>
+            )}
+            {section.paragraphs.map((para, pi) => {
+              if (para.startsWith("__BULLETS_")) {
+                const idx = parseInt(para.replace("__BULLETS_", ""), 10);
+                return (
+                  <div key={pi} className="my-6 rounded-xl border border-border bg-surface p-6 space-y-3">
+                    {section.bullets[idx].map((b, bi) => (
+                      <div key={bi} className="flex items-start gap-3">
+                        <span className="w-5 h-5 rounded-full bg-accent/10 text-accent flex-shrink-0 flex items-center justify-center text-xs font-bold mt-0.5">
+                          {bi + 1}
+                        </span>
+                        <p className="text-base text-text-muted leading-relaxed">{renderInline(b)}</p>
+                      </div>
+                    ))}
+                  </div>
+                );
+              }
+              const isBold = para.startsWith("**") && para.endsWith("**");
+              if (isBold) {
+                return (
+                  <div key={pi} className="my-8 rounded-2xl bg-accent/[0.06] border border-accent/15 p-6 md:p-8">
+                    <p className="text-lg md:text-xl font-semibold text-text leading-relaxed">
+                      {para.slice(2, -2)}
+                    </p>
+                  </div>
+                );
+              }
+              return (
+                <p key={pi} className="text-[1.05rem] md:text-lg text-text-muted leading-[1.85] my-5">
+                  {renderInline(para)}
+                </p>
+              );
+            })}
+          </div>
+        </FadeIn>
+      ))}
+    </div>
+  );
 }
 
-function renderInline(text: string): ReactNode[] {
-  const parts = text.split(/(\*\*.*?\*\*)/g);
-  return parts.map((part, i) => {
-    if (part.startsWith("**") && part.endsWith("**")) {
-      return (
-        <strong key={i} className="text-text font-bold">
-          {part.slice(2, -2)}
-        </strong>
-      );
-    }
-    return <span key={i}>{part}</span>;
-  });
+// ══════════════════════════════════════════════════════════
+// VARIANT 3 — NARRATIVE  (Brand Trust / Strategy blog)
+// Personal, flowing, no rigid structure — like a letter
+// ══════════════════════════════════════════════════════════
+function NarrativeContent({ sections, post }: { sections: Section[]; post: BlogPost | any }) {
+  return (
+    <div className="max-w-[660px] mx-auto">
+      {/* Opening letter */}
+      <FadeIn>
+        <p className="text-sm font-mono text-text-muted mb-8 border-b border-border pb-6">
+          A perspective from {post.author} · {formatDate(post.date)}
+        </p>
+      </FadeIn>
+
+      {sections.map((section, si) => (
+        <FadeIn key={si}>
+          <div className={si > 0 ? "mt-12" : ""}>
+            {section.heading && (
+              <p className="text-lg font-semibold text-text italic mt-14 mb-4 leading-snug">
+                — {section.heading}
+              </p>
+            )}
+            {section.paragraphs.map((para, pi) => {
+              if (para.startsWith("__BULLETS_")) {
+                const idx = parseInt(para.replace("__BULLETS_", ""), 10);
+                return (
+                  <div key={pi} className="my-7 space-y-2 pl-4">
+                    {section.bullets[idx].map((b, bi) => (
+                      <p key={bi} className="text-base md:text-lg text-text-muted leading-relaxed flex items-start gap-3">
+                        <span className="text-accent mt-1.5 flex-shrink-0">•</span>
+                        {renderInline(b)}
+                      </p>
+                    ))}
+                  </div>
+                );
+              }
+              const isBold = para.startsWith("**") && para.endsWith("**");
+              if (isBold) {
+                return (
+                  <div key={pi} className="my-10 text-center px-4">
+                    <p className="text-2xl md:text-3xl font-light text-text leading-relaxed italic">
+                      &ldquo;{para.slice(2, -2)}&rdquo;
+                    </p>
+                  </div>
+                );
+              }
+              return (
+                <p
+                  key={pi}
+                  className={`text-[1.05rem] md:text-lg text-text-muted leading-[1.95] my-5 ${pi === 0 && si === 0 ? "font-medium text-text text-xl" : ""}`}
+                >
+                  {renderInline(para)}
+                </p>
+              );
+            })}
+          </div>
+        </FadeIn>
+      ))}
+
+      <FadeIn>
+        <div className="mt-16 pt-8 border-t border-border">
+          <p className="text-sm text-text-muted italic">
+            — Written honestly. Not optimized for clicks.
+          </p>
+        </div>
+      </FadeIn>
+    </div>
+  );
 }
 
-// ── Main Component ──────────────────────────────────────────
-interface BlogPostContentProps {
-  post: BlogPost | any;
-  relatedPosts: BlogPost[] | any[];
+// ══════════════════════════════════════════════════════════
+// VARIANT 4 — TECHNICAL  (Performance / Dev blog)
+// Data-first, numbered steps, stat callouts
+// ══════════════════════════════════════════════════════════
+function TechnicalContent({ sections }: { sections: Section[] }) {
+  return (
+    <div className="max-w-[760px] mx-auto">
+      {sections.map((section, si) => (
+        <FadeIn key={si}>
+          <div className={si > 0 ? "mt-16" : ""}>
+            {section.heading && (
+              <div className="flex items-center gap-4 mb-6 mt-14 pb-4 border-b border-border">
+                <span className="text-xs font-mono bg-text text-bg px-2.5 py-1 rounded font-bold">
+                  §{si}
+                </span>
+                <h2 className="text-xl md:text-2xl font-bold text-text font-display uppercase tracking-tight">
+                  {section.heading}
+                </h2>
+              </div>
+            )}
+            {section.paragraphs.map((para, pi) => {
+              if (para.startsWith("__BULLETS_")) {
+                const idx = parseInt(para.replace("__BULLETS_", ""), 10);
+                return (
+                  <div key={pi} className="my-6 rounded-xl overflow-hidden border border-border">
+                    {section.bullets[idx].map((b, bi) => (
+                      <div
+                        key={bi}
+                        className="flex items-start gap-4 px-5 py-4 border-b border-border/50 last:border-0 hover:bg-surface transition-colors"
+                      >
+                        <span className="flex-shrink-0 w-6 h-6 rounded bg-accent/10 text-accent text-xs font-bold flex items-center justify-center mt-0.5">
+                          {bi + 1}
+                        </span>
+                        <p className="text-sm md:text-base text-text-muted leading-relaxed">
+                          {renderInline(b)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                );
+              }
+              const isBold = para.startsWith("**") && para.endsWith("**");
+              if (isBold) {
+                return (
+                  <div
+                    key={pi}
+                    className="my-8 rounded-lg border-l-4 border-accent bg-accent/[0.04] px-6 py-5"
+                  >
+                    <span className="text-xs font-mono text-accent uppercase tracking-widest block mb-2">
+                      Key insight
+                    </span>
+                    <p className="text-base md:text-lg font-semibold text-text leading-relaxed">
+                      {para.slice(2, -2)}
+                    </p>
+                  </div>
+                );
+              }
+              // Check if it has stats (numbers with %)
+              const hasStat = /\d+(\.\d+)?[%ms]/.test(para);
+              return (
+                <p
+                  key={pi}
+                  className={`text-[1.05rem] md:text-lg text-text-muted leading-[1.85] my-5 ${hasStat ? "font-medium" : ""}`}
+                >
+                  {renderInline(para)}
+                </p>
+              );
+            })}
+          </div>
+        </FadeIn>
+      ))}
+    </div>
+  );
 }
 
+// ══════════════════════════════════════════════════════════
+// Portable Text (Sanity fallback) components
+// ══════════════════════════════════════════════════════════
 const portableTextComponents: PortableTextComponents = {
   block: {
     normal: ({ children }) => (
       <FadeIn>
-        <p className="text-[1.1rem] md:text-xl text-text-muted leading-[1.85] my-7 tracking-[-0.01em]">
-          {children}
-        </p>
+        <p className="text-[1.1rem] md:text-xl text-text-muted leading-[1.85] my-7">{children}</p>
       </FadeIn>
     ),
     h2: ({ children }) => (
       <FadeIn>
-        <div className="mt-24 mb-12 flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <span className="block w-3 h-3 rounded-full border-2 border-accent/30" />
-            <span className="block w-8 h-[2px] bg-gradient-to-r from-accent/40 to-transparent" />
-          </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-text font-display tracking-tight uppercase leading-[1.1]">
-            {children}
-          </h2>
-        </div>
-      </FadeIn>
-    ),
-    blockquote: ({ children }) => (
-      <FadeIn>
-        <div className="my-12 md:my-16 relative">
-          <div className="absolute -inset-4 bg-gradient-to-r from-accent/[0.04] via-transparent to-accent/[0.02] rounded-3xl blur-xl" />
-          <blockquote className="relative pl-8 md:pl-10 border-l-[3px] border-accent py-2">
-            <div className="text-2xl md:text-3xl lg:text-[2rem] font-bold text-text leading-[1.25] font-display uppercase tracking-tight">
-              {children}
-            </div>
-          </blockquote>
-        </div>
+        <h2 className="text-3xl md:text-4xl font-bold text-text font-display tracking-tight uppercase mt-20 mb-8">
+          {children}
+        </h2>
       </FadeIn>
     ),
   },
   list: {
     bullet: ({ children }) => (
       <FadeIn>
-        <div className="my-8 py-6 px-8 md:px-10 rounded-2xl bg-[var(--gradient-cool)]/40 border border-border/40 backdrop-blur-sm">
-          <ul className="space-y-4">{children}</ul>
-        </div>
+        <ul className="my-6 space-y-2 pl-4">{children}</ul>
       </FadeIn>
     ),
   },
   listItem: {
     bullet: ({ children }) => (
-      <li className="flex items-start gap-4 text-text leading-relaxed group">
-        <span className="mt-1.5 w-6 h-[2px] bg-accent/50 shrink-0 group-hover:w-8 group-hover:bg-accent transition-all duration-300" />
-        <span className="text-[1.05rem] md:text-lg font-medium">
-          {children}
-        </span>
+      <li className="flex items-start gap-3 text-text-muted text-base leading-relaxed">
+        <span className="text-accent mt-1">•</span>
+        {children}
       </li>
     ),
   },
@@ -267,184 +373,158 @@ const portableTextComponents: PortableTextComponents = {
     strong: ({ children }) => (
       <strong className="text-text font-bold">{children}</strong>
     ),
-    internalLink: ({ value, children }: any) => {
-      if (!value?.reference?.slug?.current) return <span className="text-accent">{children}</span>;
-      const type = value.reference._type;
-      const href = `/${type === 'caseStudy' ? 'case-studies' : 'blogs'}/${value.reference.slug.current}`;
-      return (
-        <Link href={href} className="text-accent hover:text-accent-hover transition-colors duration-200 underline decoration-accent/30 underline-offset-4">
-          {children}
-        </Link>
-      );
-    },
   },
 };
 
-export default function BlogPostContent({
-  post,
-  relatedPosts,
-}: BlogPostContentProps) {
+// ══════════════════════════════════════════════════════════
+// MAIN COMPONENT
+// ══════════════════════════════════════════════════════════
+interface BlogPostContentProps {
+  post: BlogPost | any;
+  relatedPosts: BlogPost[] | any[];
+}
+
+export default function BlogPostContent({ post, relatedPosts }: BlogPostContentProps) {
   const articleRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: articleRef,
     offset: ["start start", "end end"],
   });
-  const scaleX = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
-    restDelta: 0.001,
-  });
+  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
 
-  const contentElements = useMemo(() => {
+  const sections = useMemo(() => parseSections(post.content || ""), [post.content]);
+  const variant = post.variant || "editorial";
+
+  const contentBody = useMemo(() => {
     if (post.body && Array.isArray(post.body)) {
       return <PortableText value={post.body} components={portableTextComponents} />;
     }
-    return parseMarkdownContent(post.content || "");
-  }, [post.content, post.body]);
+    if (variant === "editorial") return <EditorialContent sections={sections} />;
+    if (variant === "qanda") return <QandAContent sections={sections} />;
+    if (variant === "narrative") return <NarrativeContent sections={sections} post={post} />;
+    if (variant === "technical") return <TechnicalContent sections={sections} />;
+    return <EditorialContent sections={sections} />;
+  }, [post, sections, variant]);
+
+  // ── Hero style per variant ─────────────────────────────
+  const heroAccentColor =
+    variant === "editorial" ? "from-purple-500/10"
+    : variant === "qanda" ? "from-blue-500/10"
+    : variant === "narrative" ? "from-amber-500/10"
+    : "from-green-500/10";
 
   return (
     <>
-      {/* Reading Progress Bar */}
+      {/* Reading Progress */}
       <motion.div
         className="fixed top-0 left-0 right-0 h-[3px] bg-accent origin-left z-[100]"
         style={{ scaleX }}
       />
 
       <article ref={articleRef}>
-        {/* Hero Section */}
-        <header className="relative pt-32 pb-20 md:pt-40 md:pb-28 lg:pt-48 lg:pb-36 overflow-hidden">
-          <div className="absolute inset-0 gradient-hero" />
-          <div className="absolute inset-0" />
-
-          {/* Decorative geometry */}
-          <div className="absolute top-20 right-[8%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-accent/[0.03] to-transparent blur-3xl" />
-          <div className="absolute bottom-10 left-[5%] w-[350px] h-[350px] rounded-full bg-gradient-to-tr from-[var(--gradient-lavender)]/30 to-transparent blur-2xl" />
-
-          {/* Grid lines */}
-          <div className="absolute inset-0 opacity-[0.03]">
-            <div className="absolute top-0 left-[25%] w-px h-full bg-text" />
-            <div className="absolute top-0 left-[50%] w-px h-full bg-text" />
-            <div className="absolute top-0 left-[75%] w-px h-full bg-text" />
+        {/* ── HERO ───────────────────────────────────────── */}
+        <header className="relative overflow-hidden">
+          {/* Full-width hero image */}
+          <div className="relative w-full h-[50vh] md:h-[60vh] lg:h-[70vh] overflow-hidden">
+            <Image
+              src={post.image?.src || ""}
+              alt={post.image?.alt || post.title}
+              fill
+              className="object-cover object-center"
+              priority
+              unoptimized
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-bg via-bg/60 to-transparent" />
+            <div className={`absolute inset-0 bg-gradient-to-br ${heroAccentColor} to-transparent`} />
           </div>
 
-          <div className="container-wide relative z-10">
-            {/* Back link */}
+          {/* Meta overlay on top of image */}
+          <div className="container-wide relative z-10 -mt-48 md:-mt-56 pb-12">
             <FadeIn>
               <Link
                 href="/blogs"
-                className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-text transition-colors duration-200 mb-12 group"
+                className="inline-flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors mb-10 group"
               >
-                <ArrowLeft
-                  size={16}
-                  className="group-hover:-translate-x-1 transition-transform duration-200"
-                />
+                <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
                 All articles
               </Link>
             </FadeIn>
 
-            {/* Meta */}
             <FadeIn delay={0.05}>
-              <div className="flex flex-wrap items-center gap-4 mb-8">
-                <span className="text-xs font-medium px-3.5 py-1.5 bg-accent/[0.06] text-accent rounded-full border border-accent/10 tracking-wide uppercase">
+              <div className="flex flex-wrap items-center gap-3 mb-5">
+                <span className="text-xs font-mono px-3 py-1.5 bg-accent text-bg rounded-full font-bold uppercase tracking-wider">
                   {post.category}
                 </span>
-                <span className="flex items-center gap-1.5 text-xs text-text-muted font-mono">
-                  <Calendar size={13} />
-                  {formatDate(post.date)}
+                <span className="flex items-center gap-1.5 text-xs text-white/60 font-mono">
+                  <Calendar size={12} /> {formatDate(post.date)}
                 </span>
-                <span className="flex items-center gap-1.5 text-xs text-text-muted font-mono">
-                  <Clock size={13} />
-                  {post.readTime}
+                <span className="flex items-center gap-1.5 text-xs text-white/60 font-mono">
+                  <Clock size={12} /> {post.readTime}
                 </span>
               </div>
             </FadeIn>
 
-            {/* Title */}
             <FadeIn delay={0.1}>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-text leading-[1.05] tracking-tight max-w-5xl font-display uppercase">
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.08] tracking-tight max-w-4xl font-display">
                 {post.title}
               </h1>
             </FadeIn>
 
-            {/* Excerpt */}
             <FadeIn delay={0.15}>
-              <p className="mt-10 text-lg md:text-xl text-text-muted leading-relaxed max-w-2xl">
+              <p className="mt-6 text-base md:text-xl text-white/70 leading-relaxed max-w-2xl">
                 {post.excerpt}
               </p>
             </FadeIn>
 
-            {/* Author + Decorative line */}
             <FadeIn delay={0.2}>
-              <div className="mt-12 flex items-center gap-6">
-                <div className="w-12 h-12 rounded-full bg-accent/10 border border-accent/10 flex items-center justify-center text-sm font-bold text-accent">
-                  {post.author
-                    .split(" ")
-                    .map((n: string) => n[0])
-                    .join("")}
+              <div className="mt-8 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-accent/20 border border-accent/30 flex items-center justify-center text-xs font-bold text-accent">
+                  {post.author.split(" ").map((n: string) => n[0]).join("")}
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-text tracking-wide">
-                    {post.author}
-                  </p>
-                  <p className="text-xs text-text-muted font-mono mt-0.5">
-                    APSLOCK
-                  </p>
+                  <p className="text-sm font-semibold text-white">{post.author}</p>
+                  <p className="text-xs text-white/50 font-mono">APSLOCK</p>
                 </div>
-                <div className="hidden md:block flex-1 h-px bg-gradient-to-r from-border to-transparent ml-4" />
               </div>
             </FadeIn>
           </div>
-
-          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-bg to-transparent" />
         </header>
 
-        {/* Article Body */}
-        <div className="py-8 md:py-16">
-          <div className="container-wide">
-            <div className="max-w-[720px] mx-auto">{contentElements}</div>
-          </div>
+        {/* ── BODY ────────────────────────────────────────── */}
+        <div className="py-12 md:py-20" style={{ background: "var(--bg)" }}>
+          {contentBody}
         </div>
 
-        {/* End mark */}
+        {/* ── END MARK ────────────────────────────────────── */}
         <div className="container-wide">
           <div className="max-w-[720px] mx-auto">
             <FadeIn>
-              <div className="flex items-center justify-center gap-3 py-12">
+              <div className="flex items-center justify-center gap-3 py-10">
                 <div className="w-16 h-px bg-border" />
-                <div className="w-2.5 h-2.5 rotate-45 border-2 border-accent/30" />
+                <div className="w-2 h-2 rotate-45 border border-accent/40" />
                 <div className="w-16 h-px bg-border" />
               </div>
             </FadeIn>
           </div>
         </div>
 
-        {/* Author Card */}
-        <div className="py-12 md:py-16">
+        {/* ── AUTHOR CARD ─────────────────────────────────── */}
+        <div className="py-10 md:py-14" style={{ background: "var(--bg)" }}>
           <div className="container-wide">
             <div className="max-w-[720px] mx-auto">
               <FadeIn>
-                <div className="relative p-8 md:p-10 rounded-2xl overflow-hidden">
-                  {/* Card background */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-[var(--gradient-cool)] via-surface to-[var(--gradient-lavender)]/30" />
-                  <div className="absolute inset-0 border border-border/50 rounded-2xl" />
-
-                  <div className="relative flex items-start gap-5">
-                    <div className="w-14 h-14 rounded-full bg-accent/10 border border-accent/10 flex items-center justify-center text-lg font-bold text-accent shrink-0">
-                      {post.author
-                        .split(" ")
-                        .map((n: string) => n[0])
-                        .join("")}
+                <div className="relative p-7 md:p-9 rounded-2xl overflow-hidden border border-border bg-surface">
+                  <div className="flex items-start gap-5">
+                    <div className="w-12 h-12 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center text-base font-bold text-accent shrink-0">
+                      {post.author.split(" ").map((n: string) => n[0]).join("")}
                     </div>
                     <div>
-                      <p className="text-xs text-text-muted font-mono uppercase tracking-widest mb-1.5">
-                        Written by
-                      </p>
-                      <p className="text-xl font-bold text-text font-display uppercase tracking-tight">
+                      <p className="text-xs text-text-muted font-mono uppercase tracking-widest mb-1">Written by</p>
+                      <p className="text-lg font-bold text-text font-display uppercase tracking-tight">
                         {post.author}
                       </p>
-                      <p className="text-sm text-text-muted mt-3 leading-relaxed max-w-md">
-                        Part of the APSLOCK team — crafting digital experiences
-                        that don&apos;t just work, but matter.
+                      <p className="text-sm text-text-muted mt-2 leading-relaxed max-w-md">
+                        Part of the APSLOCK team — building digital experiences that don&apos;t just work, but matter.
                       </p>
                     </div>
                   </div>
@@ -454,43 +534,33 @@ export default function BlogPostContent({
           </div>
         </div>
 
-        {/* Related Posts */}
+        {/* ── RELATED POSTS ───────────────────────────────── */}
         {relatedPosts.length > 0 && (
-          <section className="py-20 md:py-28 relative overflow-hidden">
+          <section className="py-20 md:py-28 border-t border-border">
             <div className="container-wide">
               <FadeIn>
-                <p className="text-eyebrow mb-4">Keep Reading</p>
-                <h2 className="text-section-heading text-text mb-14">
-                  Related articles
-                </h2>
+                <p className="text-eyebrow mb-3">Keep reading</p>
+                <h2 className="text-section-heading text-text mb-12">More from us</h2>
               </FadeIn>
-
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {relatedPosts.map((related, index) => (
-                  <FadeIn key={related.slug} delay={index * 0.08}>
-                    <Link
-                      href={`/blogs/${related.slug}`}
-                      className="group block"
-                    >
+                {relatedPosts.map((related, i) => (
+                  <FadeIn key={related.slug} delay={i * 0.08}>
+                    <Link href={`/blogs/${related.slug}`} className="group block">
                       <article>
-                        <div className="relative aspect-[16/10] overflow-hidden rounded-xl bg-border-light mb-5">
+                        <div className="relative aspect-[16/10] overflow-hidden rounded-xl bg-border-light mb-4">
                           <Image
-                            src={related.image.src}
-                            alt={related.image.alt}
-                            width={related.image.width}
-                            height={related.image.height}
-                            unoptimized={true}
-                            className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
-                            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                            src={related.image?.src || ""}
+                            alt={related.image?.alt || related.title}
+                            fill
+                            unoptimized
+                            className="object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                         </div>
-                        <div className="flex items-center gap-3 mb-3">
+                        <div className="flex items-center gap-3 mb-2">
                           <span className="text-xs font-medium px-2.5 py-1 bg-accent/5 text-accent rounded-full">
                             {related.category}
                           </span>
-                          <span className="text-xs text-text-muted">
-                            {related.readTime}
-                          </span>
+                          <span className="text-xs text-text-muted">{related.readTime}</span>
                         </div>
                         <h3 className="text-base font-semibold text-text leading-snug group-hover:text-accent transition-colors duration-200">
                           {related.title}
@@ -500,18 +570,14 @@ export default function BlogPostContent({
                   </FadeIn>
                 ))}
               </div>
-
               <FadeIn delay={0.3}>
                 <div className="mt-14 text-center">
                   <Link
                     href="/blogs"
-                    className="inline-flex items-center gap-2 text-sm font-medium text-accent hover:text-accent-hover transition-colors duration-200 group"
+                    className="inline-flex items-center gap-2 text-sm font-medium text-accent hover:text-accent-hover transition-colors group"
                   >
                     View all posts
-                    <ArrowRight
-                      size={16}
-                      className="group-hover:translate-x-1 transition-transform duration-200"
-                    />
+                    <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </div>
               </FadeIn>

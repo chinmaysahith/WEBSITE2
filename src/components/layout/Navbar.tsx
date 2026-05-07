@@ -32,6 +32,7 @@ export default function Navbar({ links, siteName }: NavbarProps) {
 
   // Close mobile menu automatically on route change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsOpen(false);
   }, [pathname]);
 
@@ -62,7 +63,7 @@ export default function Navbar({ links, siteName }: NavbarProps) {
           {/* Desktop Nav */}
           <ul className="hidden md:flex items-center gap-8">
             {links
-              .filter((l) => l.href !== "/")
+              .filter((l) => l.href !== "/" && l.href !== "/contact")
               .map((link) => {
                 const active = isActive(link.href);
                 return (

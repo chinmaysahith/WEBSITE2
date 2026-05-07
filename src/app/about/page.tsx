@@ -9,9 +9,12 @@ import GrainBlobs from "@/components/shared/GrainBlobs";
 import { values, workProcess } from "@/lib/data";
 
 export const metadata: Metadata = {
-  title: "About",
+  title: "About APSLOCK — Atlanta Digital Agency",
   description:
-    "APSLOCK is a strategic design and technology studio based in Atlanta. Meet the team, learn our values, and see how we work.",
+    "Meet the APSLOCK team — a senior-led Atlanta digital agency combining strategy, design, and technology. Learn our values, process, and how we work as your partner.",
+  alternates: {
+    canonical: "https://apslock.com/about",
+  },
 };
 
 export default function AboutPage() {

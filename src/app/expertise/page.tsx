@@ -5,9 +5,12 @@ import GrainBlobs from "@/components/shared/GrainBlobs";
 import { serviceSegments } from "@/lib/data";
 
 export const metadata: Metadata = {
-  title: "Expertise",
+  title: "Services — Digital Platforms, AI, Brand & Growth Marketing",
   description:
-    "From brand foundations to growth marketing, web development, and content strategy — explore APSLOCK's full range of digital services.",
+    "Six disciplines, one studio: digital platforms, product & app experiences, AI-driven solutions, growth marketing, search & visibility, and brand identity — all working together.",
+  alternates: {
+    canonical: "https://apslock.com/expertise",
+  },
 };
 
 export default function ExpertisePage() {

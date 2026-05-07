@@ -3,45 +3,22 @@ import FadeIn from "@/components/shared/FadeIn";
 import BlogFilter from "@/components/blog/BlogFilter";
 import GrainBlobs from "@/components/shared/GrainBlobs";
 import { blogPosts as fallbackPosts, blogCategories } from "@/lib/data";
-import { client } from "@/sanity/lib/client";
-import { getPostsQuery } from "@/sanity/lib/queries";
 
 export const metadata: Metadata = {
-  title: "Blog",
+  title: "Blog — Strategy, Design & Growth Insights",
   description:
-    "Insights on brand strategy, design systems, SEO, web performance, and digital marketing from the APSLOCK team.",
+    "Expert insights on brand strategy, web design, SEO, performance marketing, and digital growth from the APSLOCK team in Atlanta.",
+  alternates: {
+    canonical: "https://apslock.com/blogs",
+  },
 };
 
 export const revalidate = 60; // revalidate every minute
 
 export default async function BlogsPage() {
-  let posts = fallbackPosts;
-  
-  try {
-    // Attempt to fetch from Sanity if env vars are present
-    if (process.env.NEXT_PUBLIC_SANITY_PROJECT_ID) {
-      const sanityPosts = await client.fetch(getPostsQuery);
-      if (sanityPosts && sanityPosts.length > 0) {
-        // Merge Sanity posts with existing fallback posts so old content isn't lost
-        const sanitySlugs = new Set(sanityPosts.map((p: any) => p.slug));
-        const filteredFallbacks = fallbackPosts.filter((p) => !sanitySlugs.has(p.slug));
-        posts = [...sanityPosts, ...filteredFallbacks];
-      }
-    }
-  } catch (error) {
-    console.error("Error fetching from Sanity:", error);
-    // Silent fallback to local data
-  }
-
-  // Derive categories dynamically from posts, or use fallback
-  const dynamicCategories = [
-    { label: "All", value: "all" },
-    ...Array.from(new Set(posts.map(p => p.category))).map(cat => ({ 
-      label: cat as string, 
-      value: cat as string 
-    }))
-  ];
-  const categoriesToUse = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ? dynamicCategories : blogCategories;
+  // Always use the curated local posts — no Sanity merge
+  const posts = fallbackPosts;
+  const categoriesToUse = blogCategories;
 
   return (
     <div className="relative overflow-hidden" style={{ background: "var(--bg)" }}>

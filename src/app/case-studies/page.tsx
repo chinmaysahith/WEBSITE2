@@ -10,9 +10,12 @@ import GrainBlobs from "@/components/shared/GrainBlobs";
 import { caseStudies, processSteps } from "@/lib/data";
 
 export const metadata: Metadata = {
-  title: "Case Studies",
+  title: "Case Studies — Real Results from Our Digital Agency",
   description:
-    "Explore how APSLOCK has helped brands across eCommerce, retail, healthcare, and nonprofits achieve measurable growth through strategic design and technology.",
+    "See how APSLOCK drives measurable growth: +340% revenue for eCommerce, 87% patient adoption for healthcare, $4.2M raised for nonprofits. Real projects, real results.",
+  alternates: {
+    canonical: "https://apslock.com/case-studies",
+  },
 };
 
 export default function CaseStudiesPage() {

@@ -7,9 +7,12 @@ import GrainBlobs from "@/components/shared/GrainBlobs";
 import { heroContent, capabilities, blogPosts } from "@/lib/data";
 
 export const metadata: Metadata = {
-  title: "APSLOCK — Digital Agency | Web, Brand & Growth",
+  title: "APSLOCK — Atlanta Digital Agency | Web Design, Brand & Growth",
   description:
-    "APSLOCK is a modern digital agency crafting web experiences, brand identities, and growth strategies that drive measurable results.",
+    "Atlanta's results-driven digital agency for web design, brand identity & growth marketing. Trusted by eCommerce, healthcare, fintech & nonprofit brands to deliver measurable growth.",
+  alternates: {
+    canonical: "https://apslock.com",
+  },
 };
 
 export default function HomePage() {
