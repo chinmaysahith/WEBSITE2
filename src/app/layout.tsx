@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-import { Khand, Hind, Fraunces } from "next/font/google";
+import { Oswald, Hind, Fraunces } from "next/font/google";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import CookieBanner from "@/components/shared/CookieBanner";
@@ -21,8 +21,8 @@ const fraunces = Fraunces({
   display: "swap",
 });
 
-const khand = Khand({
-  weight: ["400", "600", "700"],
+const oswald = Oswald({
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
   variable: "--font-display",
   display: "swap",
@@ -147,7 +147,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${bilbesto.variable} ${fraunces.variable} ${khand.variable} ${hind.variable} h-full`}
+      className={`${bilbesto.variable} ${fraunces.variable} ${oswald.variable} ${hind.variable} h-full`}
     >
       <body className="min-h-full flex flex-col antialiased overflow-x-hidden">
         <script
