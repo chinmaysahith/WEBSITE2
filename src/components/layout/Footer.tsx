@@ -100,11 +100,11 @@ function GiantWordmark({ name }: { name: string }) {
         }}
         onMouseEnter={(e) => {
           (e.currentTarget as HTMLDivElement).style.transform = "skewX(-4deg) scale(1.01)";
-          (e.currentTarget as HTMLDivElement).style.WebkitTextStroke = "1.5px rgba(250,250,247,0.14)";
+          (e.currentTarget as HTMLDivElement).style.webkitTextStroke = "1.5px rgba(250,250,247,0.14)";
         }}
         onMouseLeave={(e) => {
           (e.currentTarget as HTMLDivElement).style.transform = "skewX(0deg) scale(1)";
-          (e.currentTarget as HTMLDivElement).style.WebkitTextStroke = "1.5px rgba(250,250,247,0.09)";
+          (e.currentTarget as HTMLDivElement).style.webkitTextStroke = "1.5px rgba(250,250,247,0.09)";
         }}
       >
         {name}

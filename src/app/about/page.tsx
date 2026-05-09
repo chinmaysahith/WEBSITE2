@@ -6,7 +6,7 @@ import WorkProcess from "@/components/about/WorkProcess";
 import TeamSection from "@/components/about/TeamSection";
 import BigCTA from "@/components/shared/BigCTA";
 import GrainBlobs from "@/components/shared/GrainBlobs";
-import { values, workProcess } from "@/lib/data";
+import { workProcess } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: "About APSLOCK — Atlanta Digital Agency",
@@ -44,7 +44,7 @@ export default function AboutPage() {
       </section>
 
       {/* Values */}
-      <div className="relative z-10"><ValuesSection values={values} /></div>
+      <div className="relative z-10"><ValuesSection /></div>
 
       {/* Work Process */}
       <div className="relative z-10"><WorkProcess process={workProcess} /></div>
