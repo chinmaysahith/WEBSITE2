@@ -29,7 +29,6 @@ export default function CaseStudiesPage() {
         <SpinningText />
         <div className="container-wide">
           <FadeIn>
-            <p className="text-eyebrow text-accent mb-4">Case Studies</p>
             <h1 className="text-hero text-text max-w-3xl">
               <HighlightText text="Work that speaks for itself" highlight="speaks" />
             </h1>

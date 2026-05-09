@@ -1,25 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import localFont from "next/font/local";
-import { Oswald, Hind, Fraunces } from "next/font/google";
+import { Oswald, Hind, Caveat } from "next/font/google";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import CookieBanner from "@/components/shared/CookieBanner";
 import { siteMeta, navLinks, contactInfo } from "@/lib/data";
 import "./globals.css";
-
-const bilbesto = localFont({
-  src: "../../public/fonts/VintageBilbesto.otf",
-  variable: "--font-numeral",
-  display: "swap",
-});
-
-const fraunces = Fraunces({
-  weight: ["300", "400", "700"],
-  style: ["normal", "italic"],
-  subsets: ["latin"],
-  variable: "--font-editorial",
-  display: "swap",
-});
 
 const oswald = Oswald({
   weight: ["400", "500", "600", "700"],
@@ -32,6 +17,13 @@ const hind = Hind({
   weight: ["400", "500", "600"],
   subsets: ["latin"],
   variable: "--font-sans",
+  display: "swap",
+});
+
+const caveat = Caveat({
+  weight: ["400", "700"],
+  subsets: ["latin"],
+  variable: "--font-caveat",
   display: "swap",
 });
 
@@ -147,9 +139,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${bilbesto.variable} ${fraunces.variable} ${oswald.variable} ${hind.variable} h-full`}
+      className={`${oswald.variable} ${hind.variable} ${caveat.variable} h-full`}
     >
-      <body className="min-h-full flex flex-col antialiased overflow-x-hidden">
+      <body className="font-sans min-h-full flex flex-col antialiased overflow-x-hidden">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}

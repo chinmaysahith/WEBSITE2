@@ -3,6 +3,8 @@
 import * as React from "react"
 import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
+import Link from "next/link"
+import { ArrowUpRight } from "lucide-react"
 import type { Capability } from "@/lib/data"
 import FadeIn from "@/components/shared/FadeIn"
 
@@ -11,21 +13,17 @@ interface AnimatedCapabilitiesProps {
 }
 
 const capabilityImages = [
-  "/capabilities/digital-platforms.png",
-  "/capabilities/product-app.png",
-  "/capabilities/ai-solutions.png",
-  "/capabilities/growth-marketing.png",
-  "/capabilities/search-visibility.png",
   "/capabilities/brand-identity.png",
+  "/capabilities/growth-marketing.png",
+  "/capabilities/digital-platforms.png",
+  "/capabilities/search-visibility.png",
 ]
 
 const timelines = [
-  "2 – 4 weeks",
   "4 – 8 weeks",
-  "3 – 6 weeks",
-  "2 – 4 weeks",
-  "1 – 3 weeks",
-  "2 – 5 weeks",
+  "Ongoing",
+  "12 – 16 weeks",
+  "Ongoing",
 ]
 
 function pad(n: number) {
@@ -123,7 +121,7 @@ export default function AnimatedCapabilities({ items }: AnimatedCapabilitiesProp
       <div className="px-6 md:px-10 flex flex-col gap-5 lg:hidden">
         {items.map((item, index) => (
           <FadeIn key={item.title} delay={index * 0.05}>
-            <div className="flex gap-4">
+            <Link href={item.href} className="flex gap-4 group">
               <span
                 style={{
                   fontFamily: "var(--font-mono)",
@@ -137,14 +135,14 @@ export default function AnimatedCapabilities({ items }: AnimatedCapabilitiesProp
                 {pad(index)}.
               </span>
               <div>
-                <p className="font-display font-bold text-sm uppercase tracking-tight mb-1 text-text">
+                <p className="font-display font-bold text-sm uppercase tracking-tight mb-1 text-text group-hover:text-amber-500 transition-colors">
                   {item.title}
                 </p>
                 <p className="text-sm leading-relaxed text-text-muted">
                   {item.description}
                 </p>
               </div>
-            </div>
+            </Link>
           </FadeIn>
         ))}
       </div>
@@ -395,24 +393,41 @@ export default function AnimatedCapabilities({ items }: AnimatedCapabilitiesProp
                 overflow: "hidden",
               }}
             >
-              <Image
-                src={capabilityImages[activeIndex % capabilityImages.length]}
-                alt={items[activeIndex].title}
-                fill
-                sizes="(max-width: 1280px) 35vw, 500px"
-                className="object-cover"
-                priority={activeIndex === 0}
-              />
-              
-              {/* Bottom gradient overlay — moves WITH the image */}
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  background: "linear-gradient(to top, rgba(0,0,0,0.3) 0%, transparent 45%)",
-                  pointerEvents: "none",
-                }}
-              />
+              <Link href={items[activeIndex].href} className="group relative block w-full h-full">
+                <Image
+                  src={capabilityImages[activeIndex % capabilityImages.length]}
+                  alt={items[activeIndex].title}
+                  fill
+                  sizes="(max-width: 1280px) 35vw, 500px"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  priority={activeIndex === 0}
+                />
+                
+                {/* Bottom gradient overlay — moves WITH the image */}
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: "linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 50%)",
+                    pointerEvents: "none",
+                  }}
+                />
+
+                {/* Subtle dark overlay on hover */}
+                <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+                {/* Top-Right Glass Pill */}
+                <div className="absolute top-6 right-6 flex items-center opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-2 group-hover:translate-y-0 ease-out">
+                  <div className="flex items-center rounded-full bg-white/10 backdrop-blur-md border border-white/20 p-1.5 shadow-2xl">
+                    <span className="px-4 text-white font-display text-[0.75rem] font-bold uppercase tracking-[0.15em]">
+                      View More
+                    </span>
+                    <div className="w-8 h-8 rounded-full bg-white text-[#1A1625] flex items-center justify-center shadow-sm transform group-hover:rotate-[15deg] transition-transform duration-500">
+                      <ArrowUpRight className="w-4 h-4" strokeWidth={2.5} />
+                    </div>
+                  </div>
+                </div>
+              </Link>
             </motion.div>
           </AnimatePresence>
         </div>

@@ -28,7 +28,7 @@ export default async function BlogsPage() {
       <section className="pt-36 pb-16 md:pt-44 md:pb-20 relative z-10">
         <div className="container-wide">
           <FadeIn>
-            <p className="text-eyebrow text-accent mb-4">Blog</p>
+
             <h1 className="text-hero text-text max-w-2xl">
               Ideas &amp; insights
             </h1>

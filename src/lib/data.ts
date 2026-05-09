@@ -56,7 +56,9 @@ export const navLinks: NavLink[] = [
 // ── Hero ─────────────────────────────────────────────────
 
 export interface HeroContent {
-  headline: string;
+  headlinePrefix: string;
+  headlineScript: string;
+  headlineWords: string[];
   subline: string;
   primaryCta: { label: string; href: string };
   secondaryCta: { label: string; href: string };
@@ -64,10 +66,12 @@ export interface HeroContent {
 }
 
 export const heroContent: HeroContent = {
-  headline: "Built to stand out. Engineered to perform.",
+  headlinePrefix: "We ",
+  headlineScript: "craft",
+  headlineWords: ["brands.", "growth.", "cultures.", "platforms."],
   subline:
-    "APSLOCK partners with ambitious brands to design and build digital experiences, platforms, and campaigns that drive measurable growth.",
-  primaryCta: { label: "View our work", href: "/case-studies" },
+    "<span class='text-[var(--text)] font-semibold'>APSLOCK</span> partners with ambitious brands to design and build digital experiences, platforms, and campaigns that drive <span class='text-[var(--text)] font-semibold'>measurable growth.</span>",
+  primaryCta: { label: "Explore our expertise", href: "/expertise" },
   secondaryCta: { label: "Let's talk", href: "/contact" },
   image: {
     src: "/images/hero-brand.jpg",
@@ -94,12 +98,12 @@ export const featuredCases: FeaturedCase[] = [
   {
     slug: "elevate-commerce-redesign",
     index: "01.",
-    title: "Reimagining the Online Shopping Experience",
-    subtitle: "A conversion-optimized storefront that boosted revenue 340%",
+    title: "We Can Reimagine Your Online Shopping Experience",
+    subtitle: "A conversion-optimized storefront designed to maximize revenue.",
     description:
-      "A ground-up redesign that transformed a legacy storefront into a conversion-optimized platform, boosting revenue by 340% in six months.",
+      "We can execute a ground-up redesign to transform your legacy storefront into a conversion-optimized platform, built to scale and boost revenue.",
     industry: "eCommerce",
-    year: "2024",
+    year: "Concept",
     image: {
       src: "/images/cases/case-01.jpg",
       alt: "Elevate Commerce website redesign showcase",
@@ -110,12 +114,12 @@ export const featuredCases: FeaturedCase[] = [
   {
     slug: "haven-health-platform",
     index: "02.",
-    title: "A Patient Portal That People Actually Use",
-    subtitle: "Accessible healthcare portal serving 200K+ patients",
+    title: "We Build Portals That People Actually Use",
+    subtitle: "Accessible, user-centric platforms designed for scale.",
     description:
-      "Designed and built an accessible patient portal that simplified appointment booking, telehealth, and record access for 200K+ patients.",
+      "We can design and build accessible digital portals that simplify complex workflows—whether it's appointment booking, customer dashboards, or record access.",
     industry: "Healthcare",
-    year: "2024",
+    year: "Concept",
     image: {
       src: "/images/cases/case-02.jpg",
       alt: "Haven Health patient portal interface",
@@ -126,12 +130,12 @@ export const featuredCases: FeaturedCase[] = [
   {
     slug: "greenleaf-brand-identity",
     index: "03.",
-    title: "Building a Brand from the Ground Up",
-    subtitle: "Full brand identity and digital presence for a sustainable food brand",
+    title: "We Can Build Your Brand from the Ground Up",
+    subtitle: "Comprehensive brand identity and digital presence strategy.",
     description:
-      "Full brand identity system and digital presence for a sustainable food brand, from naming through launch-day campaigns.",
+      "We offer full brand identity systems and digital presence strategies for your brand, taking you from initial naming all the way through to launch-day campaigns.",
     industry: "Retail",
-    year: "2023",
+    year: "Concept",
     image: {
       src: "/images/cases/case-03.jpg",
       alt: "GreenLeaf Organics brand identity system",
@@ -147,44 +151,37 @@ export interface Capability {
   title: string;
   description: string;
   icon: string; // Lucide icon name
+  href: string;
 }
 
 export const capabilities: Capability[] = [
   {
-    title: "Digital Platforms",
+    title: "Brand Foundations",
     description:
-      "We design and develop scalable web experiences that form the foundation of your digital presence—built for performance, flexibility, and growth.",
-    icon: "Monitor",
-  },
-  {
-    title: "Product & App Experiences",
-    description:
-      "From concept to launch, we create intuitive applications that solve real problems and deliver seamless user experiences across devices.",
-    icon: "Layers",
-  },
-  {
-    title: "AI-Driven Solutions",
-    description:
-      "We integrate intelligent systems that automate workflows, enhance decision-making, and unlock new possibilities for modern businesses.",
-    icon: "Cpu",
-  },
-  {
-    title: "Growth Marketing",
-    description:
-      "We craft data-driven campaigns that connect brands with the right audience—turning visibility into engagement and engagement into results.",
-    icon: "TrendingUp",
-  },
-  {
-    title: "Search & Visibility",
-    description:
-      "We optimize digital presence to ensure your brand is discoverable, relevant, and consistently positioned where it matters most.",
-    icon: "Search",
-  },
-  {
-    title: "Brand Identity & Design",
-    description:
-      "We create distinctive visual identities that communicate clearly, resonate deeply, and establish a strong, memorable brand presence.",
+      "The backbone of every brand that lasts — identity, story, and systems that earn attention before your product ever speaks. We build the foundation your growth runs on.",
     icon: "Palette",
+    href: "/expertise/brand-foundations",
+  },
+  {
+    title: "Growth & Go-To-Market",
+    description:
+      "From first launch to scaled pipeline, we turn market ambition into measurable momentum. Sharp positioning, right-fit channels, and execution that converts.",
+    icon: "TrendingUp",
+    href: "/expertise/growth-go-to-market",
+  },
+  {
+    title: "Build & Innovation",
+    description:
+      "Websites, platforms, and products built to perform under real pressure — fast, scalable, ready for the way your business actually grows. We ship working software.",
+    icon: "Monitor",
+    href: "/expertise/build-innovation",
+  },
+  {
+    title: "Trust & Influence",
+    description:
+      "The authority layer — PR, thought leadership, and communications that compound over time. Earn trust before the first meeting, keep it after the toughest news cycle.",
+    icon: "Shield",
+    href: "/expertise/trust-influence",
   },
 ];
 

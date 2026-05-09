@@ -6,8 +6,12 @@ import ExpertiseHero from "@/components/expertise/ExpertiseHero";
 import { segments } from "./data";
 
 export const metadata = {
-  title: "Expertise — APSLOCK",
-  description: "Brand, growth, build, and influence — four disciplines built to work together.",
+  title: "Expertise — Brand, Growth, Build & Influence | APSLOCK",
+  description:
+    "Four interconnected disciplines: Brand Foundations, Growth & Go-To-Market, Build & Innovation, and Trust & Influence. Built to move together.",
+  alternates: {
+    canonical: "https://apslock.com/expertise",
+  },
 };
 
 export default function ExpertisePage() {

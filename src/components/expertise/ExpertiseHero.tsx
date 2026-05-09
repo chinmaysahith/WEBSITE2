@@ -13,15 +13,22 @@ const EASE: Record<string, CubicBezier> = {
 
 const LETTER_ROTATIONS: number[] = [-1.8, 1.2, -0.6, 2.1, -1.4, 0.8, -2.2, 1.6, -0.9];
 
+// Two clean staggered cards each side — frames the EXPERTISE heading
 const floatingPanels = [
-  { id: "portrait",  className: "left-[7%] top-[12%] h-[220px] w-[220px] md:h-[255px] md:w-[255px]",                     style: "bg-[url('/expertise/12.jpg')] bg-cover bg-[center_18%] bg-no-repeat",      label: "" },
-  { id: "orb",       className: "hidden md:block left-[0%] top-[48%] h-[325px] w-[325px]",                                style: "bg-[url('/expertise/1234.jpg')] bg-cover bg-left bg-no-repeat",             label: "" },
-  { id: "landscape", className: "right-[-4%] top-[9%] h-[240px] w-[260px] md:h-[360px] md:w-[392px]",                   style: "bg-[url('/expertise/123.jpg')] bg-cover bg-[20%_center] bg-no-repeat",     label: "" },
-  { id: "hand",      className: "hidden md:block right-[11%] top-[58%] h-[165px] w-[170px]",                             style: "bg-[url('/expertise/12345.jpg')] bg-contain bg-center bg-no-repeat",       label: "" },
-  { id: "bottom",    className: "hidden md:block left-[44%] bottom-[3%] h-[168px] w-[255px]",                            style: "bg-[url('/expertise/123456.jpg')] bg-cover bg-center bg-no-repeat",       label: "" },
+  // ── LEFT SIDE ──
+  // Top-left: portrait card, slightly rotated left
+  { id: "portrait",  className: "left-[2%] top-[10%] h-[260px] w-[200px] md:h-[320px] md:w-[248px]",   style: "bg-[url('/expertise/12.jpg')] bg-cover bg-[center_18%] bg-no-repeat",    label: "" },
+  // Bottom-left: wider card, offset down-right, overlaps portrait's bottom edge
+  { id: "orb",       className: "left-[5%] top-[44%] h-[220px] w-[240px] md:h-[268px] md:w-[295px]",   style: "bg-[url('/expertise/1234.jpg')] bg-cover bg-center bg-no-repeat",        label: "" },
+
+  // ── RIGHT SIDE ──
+  // Top-right: landscape card
+  { id: "landscape", className: "right-[2%] top-[8%] h-[240px] w-[270px] md:h-[298px] md:w-[335px]",   style: "bg-[url('/expertise/123.jpg')] bg-cover bg-[20%_center] bg-no-repeat",  label: "" },
+  // Bottom-right: square card, offset left+down
+  { id: "hand",      className: "right-[8%] top-[44%] h-[200px] w-[210px] md:h-[248px] md:w-[260px]",   style: "bg-[url('/expertise/12345.jpg')] bg-cover bg-center bg-no-repeat",      label: "" },
 ];
 
-const depths: Record<string, number> = { portrait: 1.2, landscape: 2.0, orb: 2.8, hand: 3.2, bottom: 1.8 };
+const depths: Record<string, number> = { orb: 1.0, portrait: 1.8, landscape: 1.2, hand: 2.2 };
 
 const clipReveal: Record<string, { hidden: string; visible: string }> = {
   portrait:  { hidden: "inset(0% 0% 100% 0%)", visible: "inset(0% 0% 0% 0%)" },
@@ -50,8 +57,9 @@ const floatPersonality: Record<string, { y: number[]; x: number[]; rotateZ: numb
 };
 
 const floatDurations: Record<string, number> = { portrait: 7, orb: 11, landscape: 13, hand: 8, bottom: 10 };
-const panelRotations: Record<string, number> = { portrait: -2.2, landscape: 1.4, orb: -1.8, hand: -3.4, bottom: 1.9 };
-const panelRadii: Record<string, string> = { portrait: "8px", landscape: "4px", orb: "12px", hand: "10px", bottom: "6px" };
+// Slight consistent rotations — left cluster leans left, right cluster leans right
+const panelRotations: Record<string, number> = { orb: -3.0, portrait: -1.5, bottom: -2.2, landscape: 2.5, hand: 1.8 };
+const panelRadii: Record<string, string> = { portrait: "6px", landscape: "4px", orb: "8px", hand: "6px", bottom: "5px" };
 const panelShadows: Record<string, string> = {
   portrait:  "0_40px_90px_-15px_rgba(0,0,0,0.38)",
   landscape: "0_24px_60px_-10px_rgba(0,0,0,0.22)",
@@ -212,18 +220,8 @@ export default function ExpertiseHero() {
 
         <div className="relative z-10 flex min-h-screen items-center justify-center px-6 py-16">
           <motion.div className="text-center" style={{ opacity: textOpacity, scale: textScale, y: textY, filter: textBlur, transformOrigin: "center" }}>
-            <motion.div className="absolute left-6 top-1/2 -translate-y-1/2 pointer-events-none hidden md:flex flex-col items-center gap-3" aria-hidden="true" variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }} initial="hidden" animate={isLoaded ? "visible" : "hidden"} transition={{ duration: 0.6, ease: EASE.text, delay: 1.6 }}>
-              <motion.div className="w-px bg-foreground/15 origin-top" initial={{ scaleY: 0, height: 80 }} animate={isLoaded ? { scaleY: 1 } : { scaleY: 0 }} transition={{ duration: 1.2, ease: EASE.snap, delay: 1.7 }} style={{ height: 80 }} />
-              <span className="text-[7px] uppercase tracking-[0.5em] text-foreground/20 font-medium" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed', transform: 'rotate(180deg)' }}>Studio</span>
-              <motion.div className="w-px bg-foreground/15 origin-bottom" initial={{ scaleY: 0, height: 80 }} animate={isLoaded ? { scaleY: 1 } : { scaleY: 0 }} transition={{ duration: 1.2, ease: EASE.snap, delay: 1.9 }} style={{ height: 80 }} />
-            </motion.div>
-
-            <motion.div className="mb-10 flex items-center justify-center gap-3" variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }} initial="hidden" animate={isLoaded ? "visible" : "hidden"} transition={{ duration: 0.6, ease: EASE.text, delay: 0.0 }}>
-              <div className="h-px w-8 bg-foreground/20" />
-              <span className="text-[9px] uppercase tracking-[0.5em] text-foreground/30 font-medium">01</span>
-              <div className="h-px w-8 bg-foreground/20" />
-            </motion.div>
-
+            {/* Studio vertical text removed */}
+            {/* 01 indicator removed */}
             <div className="mb-6 overflow-hidden h-[18px] flex items-center justify-center">
               <AnimatePresence mode="wait">
                 <motion.p key={eyebrowIndex} initial={{ y: "100%", opacity: 0 }} animate={{ y: "0%", opacity: 1 }} exit={{ y: "-100%", opacity: 0 }} transition={{ duration: 0.52, ease: EASE.text }} className="text-[11px] uppercase tracking-[0.42em] text-muted-foreground absolute">
@@ -233,6 +231,7 @@ export default function ExpertiseHero() {
             </div>
 
             <div className="relative overflow-visible">
+              {/* Ghost outline watermark — very faint, behind the solid heading */}
               <div className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center overflow-visible select-none" aria-hidden="true">
                 <div className="flex items-baseline whitespace-nowrap" style={{ letterSpacing: '-0.08em' }}>
                   {Array.from("EXPERTISE").map((letter, i) => (
@@ -240,7 +239,7 @@ export default function ExpertiseHero() {
                       <motion.span variants={{ hidden: { y: "110%", opacity: 0, rotate: LETTER_ROTATIONS[i] * 2 }, visible: { y: "0%", opacity: 1, rotate: 0 } }} initial="hidden" animate={isLoaded ? "visible" : "hidden"}
                         transition={{ y: { duration: 1.1, ease: EASE.soft, delay: 0.55 + i * 0.055 }, opacity: { duration: 0.3, ease: "linear", delay: 0.55 + i * 0.055 }, rotate: { duration: 1.3, ease: EASE.soft, delay: 0.55 + i * 0.055 } }}
                         className="block text-[4.4rem] sm:text-[6.2rem] md:text-[7.8rem] lg:text-[9.6rem] xl:text-[11.4rem] font-black uppercase leading-none select-none"
-                        style={{ WebkitTextStroke: '1px rgba(0,0,0,0.07)', color: 'transparent', display: 'inline-block' }}>
+                        style={{ WebkitTextStroke: '1.5px rgba(26,22,37,0.08)', color: 'transparent', display: 'inline-block' }}>
                         {letter}
                       </motion.span>
                     </div>
@@ -250,10 +249,13 @@ export default function ExpertiseHero() {
               <h1 id="hero-heading" className="flex items-baseline justify-center" style={{ letterSpacing: '-0.08em' }} aria-label="Expertise">
                 {Array.from("EXPERTISE").map((letter, i) => (
                   <div key={i} className="overflow-hidden">
-                    <motion.span variants={{ hidden: { y: "110%", opacity: 0, rotate: LETTER_ROTATIONS[i] }, visible: { y: "0%", opacity: 1, rotate: 0 } }} initial="hidden" animate={isLoaded ? "visible" : "hidden"}
+                    <motion.span
+                      variants={{ hidden: { y: "110%", opacity: 0, rotate: LETTER_ROTATIONS[i] }, visible: { y: "0%", opacity: 1, rotate: 0 } }}
+                      initial="hidden"
+                      animate={isLoaded ? "visible" : "hidden"}
                       transition={{ y: { duration: 0.92, ease: EASE.snap, delay: 0.18 + i * 0.048 }, opacity: { duration: 0.18, ease: "linear", delay: 0.18 + i * 0.048 }, rotate: { duration: 1.05, ease: EASE.soft, delay: 0.18 + i * 0.048 } }}
-                      className="block text-[3.2rem] sm:text-[4.7rem] md:text-[6rem] lg:text-[7.4rem] xl:text-[8.6rem] font-black uppercase leading-[0.86] bg-gradient-to-b from-foreground/90 from-50% to-foreground/35 to-50% bg-clip-text text-transparent"
-                      style={{ display: 'inline-block' }}>
+                      className="block text-[3.2rem] sm:text-[4.7rem] md:text-[6rem] lg:text-[7.4rem] xl:text-[8.6rem] font-black uppercase leading-[0.86]"
+                      style={{ display: 'inline-block', color: '#1A1625' }}>
                       {letter}
                     </motion.span>
                   </div>
@@ -277,12 +279,7 @@ export default function ExpertiseHero() {
             </div>
           </motion.div>
         </div>
-
-        <motion.div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2"
-          variants={{ hidden: { y: 10 }, visible: { y: 0 } }} initial="hidden" animate={isLoaded ? "visible" : "hidden"} transition={{ duration: 0.6, ease: EASE.soft, delay: 1.8 }} style={{ opacity: scrollIndicatorOp }} aria-hidden="true">
-          <span className="text-[9px] uppercase tracking-[0.38em] text-muted-foreground/60">scroll</span>
-          <motion.div className="w-px h-8 bg-gradient-to-b from-muted-foreground/40 to-transparent origin-top" initial={{ scaleY: 0 }} animate={{ scaleY: [0, 1, 0] }} transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut", delay: 2 }} />
-        </motion.div>
+        {/* Scroll indicator removed */}
 
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#F3F1ED] via-[#F3F1ED]/50 to-transparent" />
         <div className="pointer-events-none absolute inset-0 z-[5]" style={{ background: 'radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(0,0,0,0.045) 100%)' }} />

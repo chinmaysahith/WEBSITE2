@@ -31,6 +31,7 @@ export default function ContactForm({ className }: ContactFormProps) {
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const validate = (): boolean => {
     const newErrors: FormErrors = {};
@@ -57,11 +58,29 @@ export default function ContactForm({ className }: ContactFormProps) {
     if (!validate()) return;
 
     setSubmitting(true);
+    setSubmitError(null);
 
-    // TODO: wire to API route or form service
-    // Example: await fetch('/api/contact', { method: 'POST', body: JSON.stringify(formData) });
+    // [BACKEND PENDING] /api/contact — not yet implemented.
+    // Currently shows success without sending any data.
+    // Replace this block with:
+    //   const controller = new AbortController();
+    //   const timeout = setTimeout(() => controller.abort(), 8000);
+    //   try {
+    //     const res = await fetch('/api/contact', {
+    //       method: 'POST',
+    //       headers: { 'Content-Type': 'application/json' },
+    //       body: JSON.stringify(formData),
+    //       signal: controller.signal,
+    //     });
+    //     clearTimeout(timeout);
+    //     if (!res.ok) throw new Error('Failed to submit form');
+    //     setSubmitted(true);
+    //   } catch (err) {
+    //     setSubmitError('Something went wrong. Please try emailing us directly.');
+    //   } finally {
+    //     setSubmitting(false);
+    //   }
     await new Promise((resolve) => setTimeout(resolve, 1000));
-
     setSubmitting(false);
     setSubmitted(true);
   };
@@ -214,6 +233,12 @@ export default function ContactForm({ className }: ContactFormProps) {
           </>
         )}
       </button>
+
+      {submitError && (
+        <p className="text-sm text-red-500 mt-2" role="alert">
+          {submitError}
+        </p>
+      )}
     </form>
   );
 }

@@ -110,14 +110,14 @@ function DesktopReel() {
             <div className="flex items-center gap-5">
               <div className="h-px w-10 bg-[var(--accent)]" />
               <span className="font-mono text-[0.7rem] uppercase tracking-[0.22em] text-[var(--text-muted)]">
-                Our Achievements
+                Our Capabilities
               </span>
             </div>
             <Link
-              href="/case-studies"
+              href="/expertise"
               className="group flex items-center gap-2 font-mono text-[0.7rem] uppercase tracking-[0.18em] text-[var(--text-muted)] transition-colors hover:text-[var(--text)]"
             >
-              View all work
+              View expertise
               <ArrowRight
                 size={13}
                 className="transition-transform group-hover:translate-x-1"
@@ -133,11 +133,10 @@ function DesktopReel() {
             className="relative flex flex-col justify-center w-[42%] shrink-0 border-r border-[var(--border)]"
             style={{ padding: "6vh 4vw 5vh 5vw" }}
           >
-            {/* Big numeral — subtle watermark */}
+            {/* Big numeral — top-left positioning */}
             <div
               aria-hidden="true"
-              className="relative select-none mb-4"
-              style={{ height: "clamp(100px, 20vh, 220px)" }}
+              className="absolute top-10 left-10 select-none pointer-events-none"
             >
               {featuredCases.map((c, i) => {
                 const isActive = i === active;
@@ -145,16 +144,16 @@ function DesktopReel() {
                 return (
                   <span
                     key={c.slug}
-                    className="pointer-events-none absolute inset-0 flex items-end font-display font-bold leading-[0.85] tracking-[-0.04em]"
+                    className="absolute top-0 left-0 font-display font-bold leading-none tracking-tighter"
                     style={{
-                      fontSize: "clamp(6rem, 14vw, 14rem)",
+                      fontSize: "clamp(5rem, 10vw, 10rem)",
                       color: "var(--text)",
-                      opacity: isActive ? 0.07 : 0,
+                      opacity: isActive ? 0.08 : 0,
                       transform: isActive
                         ? "translateY(0) scale(1) translateZ(0)"
                         : isPast
-                        ? "translateY(-50px) scale(0.95) translateZ(0)"
-                        : "translateY(50px) scale(1.05) translateZ(0)",
+                        ? "translateY(-30px) scale(0.95) translateZ(0)"
+                        : "translateY(30px) scale(1.05) translateZ(0)",
                       transition:
                         "opacity 0.8s cubic-bezier(0.22,1,0.36,1), transform 0.8s cubic-bezier(0.22,1,0.36,1)",
                     }}
@@ -201,7 +200,7 @@ function DesktopReel() {
                     {/* Title */}
                     <div className="overflow-hidden mb-4">
                       <h3
-                        className="font-display font-bold leading-[1.08] tracking-[-0.02em] text-[var(--text)]"
+                        className="pb-2 font-display font-bold leading-[1.08] tracking-[-0.02em] text-[var(--text)]"
                         style={{
                           fontSize: "clamp(1.6rem, 2.4vw, 2.6rem)",
                           transform: isActive ? "translateY(0)" : `translateY(${dir * 110}%)`,
@@ -216,7 +215,7 @@ function DesktopReel() {
                     {/* Description */}
                     <div className="overflow-hidden mb-8">
                       <p
-                        className="max-w-sm font-sans text-[0.95rem] leading-[1.55] text-[var(--text-muted)]"
+                        className="pb-2 max-w-sm font-sans text-[0.95rem] leading-[1.55] text-[var(--text-muted)]"
                         style={{
                           transform: isActive ? "translateY(0)" : `translateY(${dir * 110}%)`,
                           transition: "transform 0.6s cubic-bezier(0.65, 0, 0.35, 1)",
@@ -237,10 +236,10 @@ function DesktopReel() {
                         }}
                       >
                         <Link
-                          href={`/case-studies/${c.slug}`}
+                          href={`/expertise`}
                           className="group inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-6 py-3 font-sans text-sm font-medium text-[var(--text)] transition-all hover:border-[var(--text)] hover:bg-[var(--text)] hover:text-[var(--bg)]"
                         >
-                          View case study
+                          Explore possibilities
                           <ArrowRight
                             size={15}
                             className="transition-transform group-hover:translate-x-1"
@@ -253,27 +252,7 @@ function DesktopReel() {
               })}
             </div>
 
-            {/* Progress */}
-            <div className="mt-auto flex items-center gap-4 border-t border-[var(--border)] pt-5">
-              <div className="flex items-center gap-2">
-                {featuredCases.map((_, i) => (
-                  <div
-                    key={i}
-                    className="rounded-full transition-all duration-500"
-                    style={{
-                      width: i === active ? 24 : 6,
-                      height: 6,
-                      backgroundColor:
-                        i === active ? "var(--text)" : "var(--border)",
-                    }}
-                  />
-                ))}
-              </div>
-              <span className="ml-auto font-mono text-[0.7rem] tracking-[0.18em] text-[var(--text-muted)]">
-                {String(active + 1).padStart(2, "0")} /{" "}
-                {String(featuredCases.length).padStart(2, "0")}
-              </span>
-            </div>
+
           </div>
 
           {/* ── RIGHT: floating stacked images (Polaroid frames) ── */}
@@ -347,7 +326,7 @@ function DesktopReel() {
 function StackedLayout() {
   return (
     <section
-      aria-label="Our achievements"
+      aria-label="Our capabilities"
       className="border-t border-[var(--border)] bg-[var(--bg)]"
     >
       {/* Section heading */}
@@ -355,11 +334,11 @@ function StackedLayout() {
         <div className="flex items-center gap-4 mb-6">
           <div className="h-px w-8 bg-[var(--accent)]" />
           <span className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-[var(--text-muted)]">
-            Our Achievements
+            Our Capabilities
           </span>
         </div>
         <h2 className="text-section-heading text-text max-w-lg">
-          Work that drives results
+          What we can build together
         </h2>
       </div>
 
@@ -404,10 +383,10 @@ function StackedLayout() {
           </div>
 
           <Link
-            href={`/case-studies/${c.slug}`}
+            href={`/expertise`}
             className="group inline-flex items-center gap-2 font-sans text-sm font-medium text-[var(--text)] underline underline-offset-4"
           >
-            View case study
+            Explore possibilities
             <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
           </Link>
         </article>

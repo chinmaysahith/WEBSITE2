@@ -23,7 +23,7 @@ export default function ContactPage() {
       <section className="pt-36 pb-24 md:pt-44 md:pb-32 relative z-10">
         <div className="container-wide">
           <FadeIn>
-            <p className="text-eyebrow text-accent mb-4">Contact</p>
+
             <h1 className="text-hero text-text max-w-2xl">
               <HighlightText text="Let's start a conversation" highlight="conversation" />
             </h1>

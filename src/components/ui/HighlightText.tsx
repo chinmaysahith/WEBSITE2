@@ -26,7 +26,7 @@ export function HighlightText({ text, highlight }: HighlightTextProps) {
           return (
             <span 
               key={i} 
-              className="font-numeral normal-case font-normal inline-block transform -rotate-2 text-[1.15em] mx-1 md:mx-2 text-[#9B2C2C] tracking-normal relative z-10 drop-shadow-sm -translate-y-[0.06em]"
+              className="font-script normal-case font-medium inline-block text-[1.4em] mx-1 md:mx-2 text-[#9B2C2C] tracking-normal relative z-10 drop-shadow-sm -translate-y-[0.06em] leading-none"
             >
               {part}
             </span>

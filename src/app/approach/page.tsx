@@ -42,18 +42,13 @@ export default function ApproachPage() {
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#F3F1ED] to-transparent pointer-events-none z-0" />
 
         <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 pt-32 pb-24 sm:pt-40 sm:pb-32 relative z-10">
-          <Reveal delay={100} duration={800} distance={16}>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#C9A84C] mb-8">
-              Our Philosophy
-            </p>
-          </Reveal>
 
 
 
           <Reveal delay={360} duration={1000} distance={32}>
-            <h2 className="mt-8 text-[clamp(2.5rem,6vw,5.5rem)] font-editorial font-light tracking-[-0.03em] text-[#1A1625] leading-[0.95] max-w-4xl">
+            <h2 className="mt-8 text-[clamp(2.5rem,6vw,5.5rem)] font-display font-bold tracking-tight text-[#1A1625] leading-[0.95] max-w-4xl">
               Technology is the medium.<br />
-              <span className="italic text-[#8A7135]">People are the point.</span>
+              <span className="font-script not-italic text-[#8A7135] text-[1.2em] leading-none">People are the point.</span>
             </h2>
           </Reveal>
 

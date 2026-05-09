@@ -3,7 +3,8 @@
 import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
 import FadeIn from "@/components/shared/FadeIn";
-import { HighlightText } from "@/components/ui/HighlightText";
+import GrainBlobs from "@/components/shared/GrainBlobs";
+import { motion, AnimatePresence } from "framer-motion";
 import type { HeroContent } from "@/lib/data";
 
 interface HeroProps {
@@ -13,6 +14,23 @@ interface HeroProps {
 export default function Hero({ content }: HeroProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [ready, setReady] = useState(false);
+  const [wordIndex, setWordIndex] = useState(0);
+
+  const wordColors = [
+    "text-[#862020]", // Deep Maroon
+    "text-[#2A9D8F]", // Deep Teal
+    "text-[#B85C38]", // Terracotta
+    "text-[#1D3557]", // Navy Blue
+  ];
+
+
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setWordIndex((prev) => (prev + 1) % content.headlineWords.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [content.headlineWords.length]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -23,6 +41,8 @@ export default function Hero({ content }: HeroProps) {
 
     let animId = 0;
     const videos: HTMLVideoElement[] = [];
+    // Hoisted so the cleanup return can reach it regardless of whether onload fired
+    let mediaElements: (HTMLVideoElement | HTMLImageElement)[] = [];
 
     const img = document.createElement("img");
     img.crossOrigin = "anonymous";
@@ -109,63 +129,103 @@ export default function Hero({ content }: HeroProps) {
         h: bb[3] - bb[1],
       }));
 
-      // --- Step 2: Create 3 video elements ---
-      const videoSrcs = [
-        "/videos/video-top.mp4",
-        "/videos/video-mid.mp4",
-        "/videos/video-bot.mp4",
+      // --- Step 2: Create media elements ---
+      const mediaSrcs = [
+        { type: "video", src: "/videos/video-top.mp4" },
+        { type: "video", src: "/videos/video-mid.mp4" },
+        { type: "video", src: "/videos/video-bot.mp4" },
       ];
 
       let readyCount = 0;
+      mediaElements = [];
 
-      videoSrcs.forEach((src, idx) => {
-        const video = document.createElement("video");
-        video.loop = true;
-        video.muted = true;
-        video.playsInline = true;
-        video.crossOrigin = "anonymous";
-        video.src = src;
-        videos[idx] = video;
+      const checkReady = () => {
+        readyCount++;
+        if (readyCount === 3) {
+          mediaElements.forEach((m) => {
+            if (m instanceof HTMLVideoElement) m.play().catch(e => console.error("Video play failed:", e));
+          });
+          setReady(true);
+          startLoop();
+        }
+      };
 
-        video.addEventListener("canplaythrough", () => {
-          readyCount++;
-          if (readyCount === 3) {
-            videos.forEach((v) => v.play().catch(e => console.error("Video play failed:", e)));
-            setReady(true);
-            startLoop();
-          }
-        }, { once: true });
-
-        video.load();
+      mediaSrcs.forEach((item, idx) => {
+        if (item.type === "video") {
+          const video = document.createElement("video");
+          video.loop = true;
+          video.muted = true;
+          video.playsInline = true;
+          video.crossOrigin = "anonymous";
+          video.src = item.src;
+          mediaElements[idx] = video;
+          video.addEventListener("canplaythrough", checkReady, { once: true });
+          video.load();
+        } else {
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          img.src = item.src;
+          mediaElements[idx] = img;
+          img.onload = checkReady;
+        }
       });
 
       // --- Step 3: requestAnimationFrame render loop ---
       function startLoop() {
-        function frame() {
+        const startTime = performance.now();
+        function frame(time: number) {
           ctx.clearRect(0, 0, W, H);
 
-          // Draw each video into its TV bounding box
+          // Draw each media into its TV bounding box
           for (let i = 0; i < 3; i++) {
-            const v = videos[i];
+            const m = mediaElements[i];
             const b = bounds[i];
-            if (v.readyState >= 2 && b.w > 0) {
+            
+            let isReady = false;
+            let mWidth = 0, mHeight = 0;
+            
+            if (m instanceof HTMLVideoElement) {
+              isReady = m.readyState >= 2;
+              mWidth = m.videoWidth;
+              mHeight = m.videoHeight;
+            } else if (m instanceof HTMLImageElement) {
+              isReady = m.complete;
+              mWidth = m.width;
+              mHeight = m.height;
+            }
+
+            if (isReady && b.w > 0) {
               // Calculate object-fit: cover to prevent stretching
-              const videoAspect = v.videoWidth / v.videoHeight;
+              const mediaAspect = mWidth / mHeight;
               const boxAspect = b.w / b.h;
 
-              let sx = 0, sy = 0, sw = v.videoWidth, sh = v.videoHeight;
+              let sx = 0, sy = 0, sw = mWidth, sh = mHeight;
 
-              if (videoAspect > boxAspect) {
-                // Video is wider than the box, crop sides
-                sw = v.videoHeight * boxAspect;
-                sx = (v.videoWidth - sw) / 2;
+              if (mediaAspect > boxAspect) {
+                // Media is wider than the box, crop sides
+                sw = mHeight * boxAspect;
+                sx = (mWidth - sw) / 2;
+                
+                // Add slow cinematic pan for image
+                if (m instanceof HTMLImageElement) {
+                  const elapsed = (time - startTime) / 1000;
+                  const panRange = mWidth - sw;
+                  sx = (panRange / 2) + Math.sin(elapsed * 0.2) * (panRange / 2);
+                }
               } else {
-                // Video is taller than the box, crop top/bottom
-                sh = v.videoWidth / boxAspect;
-                sy = (v.videoHeight - sh) / 2;
+                // Media is taller than the box, crop top/bottom
+                sh = mWidth / boxAspect;
+                sy = (mHeight - sh) / 2;
+                
+                // Add slow cinematic pan for image
+                if (m instanceof HTMLImageElement) {
+                  const elapsed = (time - startTime) / 1000;
+                  const panRange = mHeight - sh;
+                  sy = (panRange / 2) + Math.sin(elapsed * 0.2) * (panRange / 2);
+                }
               }
 
-              ctx.drawImage(v, sx, sy, sw, sh, b.x, b.y, b.w, b.h);
+              ctx.drawImage(m, sx, sy, sw, sh, b.x, b.y, b.w, b.h);
             }
           }
 
@@ -182,32 +242,55 @@ export default function Hero({ content }: HeroProps) {
     // --- Cleanup on unmount ---
     return () => {
       cancelAnimationFrame(animId);
-      videos.forEach((v) => {
-        v.pause();
-        v.src = "";
+      mediaElements.forEach((m) => {
+        if (m instanceof HTMLVideoElement) {
+          m.pause();
+          m.src = "";
+        }
       });
     };
   }, []);
 
   return (
-    <section className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-[#F3F1ED]">
-      <div className="w-full">
+    <section className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-[var(--bg)] gradient-hero">
+      <GrainBlobs variant="slate" intensity={0.08} className="opacity-40" />
+      <div className="w-full z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 items-center">
 
           {/* Left — text (padded for readability) */}
           <div className="order-2 lg:order-1 px-6 md:px-12 lg:pl-16 xl:pl-24 lg:pr-8">
             <FadeIn>
-              <p className="text-eyebrow text-accent mb-6">APSLOCK</p>
-            </FadeIn>
-            <FadeIn>
-              <h1 className="font-editorial font-light text-[clamp(4rem,6vw,7.5rem)] tracking-[-0.05em] leading-[0.84] text-text">
-                <HighlightText text={content.headline} highlight={["stand out.", "perform."]} />
-              </h1>
+              <div className="flex flex-col items-start leading-[1.1] tracking-[-0.03em] text-text mb-8">
+                {/* Line 1: We craft */}
+                <div className="text-[clamp(4.5rem,7vw,8.5rem)] font-editorial font-bold text-[var(--text)]">
+                  <span>{content.headlinePrefix}{content.headlineScript}</span>
+                </div>
+                
+                {/* Line 2: [Animated Words] */}
+                <div className="mt-[-0.5rem] md:mt-[-1.5rem]">
+                  <span className="relative inline-flex items-center min-w-[320px] lg:min-w-[550px]">
+                    <AnimatePresence mode="wait">
+                      <motion.span
+                        key={wordIndex}
+                        initial={{ opacity: 0, y: 20, filter: "blur(8px)" }}
+                        animate={{ opacity: 1, y: 0, filter: "blur(0px)", transition: { delay: 0.1, duration: 0.8 } }}
+                        exit={{ opacity: 0, y: -20, filter: "blur(12px)", transition: { duration: 0.4 } }}
+                        className={`absolute left-0 top-1/2 -translate-y-1/2 whitespace-nowrap font-script text-[clamp(6rem,10vw,12rem)] leading-[0.8] tracking-normal font-medium ${wordColors[wordIndex]}`}
+                      >
+                        {content.headlineWords[wordIndex]}
+                      </motion.span>
+                    </AnimatePresence>
+                    {/* Invisible spacer to maintain height/width */}
+                    <span className="invisible pointer-events-none whitespace-nowrap font-script text-[clamp(6rem,10vw,12rem)] leading-[0.8] tracking-normal font-medium">platforms.</span>
+                  </span>
+                </div>
+              </div>
             </FadeIn>
             <FadeIn delay={0.1}>
-              <p className="mt-6 text-lg md:text-xl text-text-muted leading-relaxed max-w-xl">
-                {content.subline}
-              </p>
+              <p 
+                className="mt-6 text-lg md:text-xl text-text-muted leading-relaxed max-w-xl"
+                dangerouslySetInnerHTML={{ __html: content.subline }}
+              />
             </FadeIn>
             <FadeIn delay={0.2}>
               <div className="mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-4">

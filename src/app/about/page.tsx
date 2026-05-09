@@ -27,7 +27,7 @@ export default function AboutPage() {
       <section className="pt-36 pb-20 md:pt-44 md:pb-28 relative z-10">
         <div className="container-wide">
           <FadeIn>
-            <p className="text-eyebrow text-accent mb-4">About Us</p>
+
             <h1 className="text-hero text-text max-w-4xl">
               <HighlightText text="A studio built on craft and conviction" highlight={["craft", "conviction"]} />
             </h1>
